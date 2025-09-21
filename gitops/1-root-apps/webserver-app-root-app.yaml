@@ -1,0 +1,37 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: webserver-apps
+  namespace: argocd
+spec:
+  description: "Webserver App applications"
+  clusterResourceWhitelist:
+    - group: "*"
+      kind: "*"
+  destinations:
+    - namespace: "*"
+      server: "*"
+  sourceRepos:
+    - "*"
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: webserver-app-root-app
+  namespace: argocd
+spec:
+  source:
+    repoURL: https://github.com/vigregus/webserver-app-infra.git
+    path: gitops/2-app-watchers
+    targetRevision: main
+    directory:
+      recurse: true
+  destination:
+    namespace: argocd
+    server: https://kubernetes.default.svc
+  project: webserver-apps
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions: []
