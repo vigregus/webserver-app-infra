@@ -14,3 +14,34 @@ config:
       credentials: secret:argocd/ghcr-secret#username#password
       default: true
       limit: 20
+
+rbac:
+  create: true
+  rules:
+    - apiGroups:
+        - argoproj.io
+      resources:
+        - applications
+      verbs:
+        - get
+        - list
+        - patch
+    - apiGroups:
+        - ""
+      resources:
+        - secrets
+        - configmaps
+      verbs:
+        - get
+        - list
+
+serviceAccount:
+  create: true
+  name: argocd-image-updater
+
+# Настройки для работы с GitHub Container Registry
+extraArgs:
+  - --registries-conf=/app/config/registries.conf
+  - --argocd-server-addr=argocd-server.argocd.svc.cluster.local
+  - --argocd-server-plaintext=true
+  - --argocd-grpc-web=true
