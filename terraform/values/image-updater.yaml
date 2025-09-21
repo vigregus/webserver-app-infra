@@ -38,10 +38,3 @@ rbac:
 serviceAccount:
   create: true
   name: argocd-image-updater
-
-# Настройки для работы с GitHub Container Registry
-extraArgs:
-  - --registries-conf=/app/config/registries.conf
-  - --argocd-server-addr=argocd-server.argocd.svc.cluster.local
-  - --argocd-server-plaintext=true
-  - --argocd-grpc-web=true
