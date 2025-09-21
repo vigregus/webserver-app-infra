@@ -15,6 +15,11 @@ metadata:
       Update {{.AppName}} to {{range .Images}}{{.Name}}:{{.Tag}} {{end}}
     argocd-image-updater.argoproj.io/backend.pull-secret: pullsecret:argocd/ghcr-secret
     argocd-image-updater.argoproj.io/frontend.pull-secret: pullsecret:argocd/ghcr-secret
+    argocd-image-updater.argoproj.io/write-back-target: "helmvalues:/dev/webserver-app/values.yaml"
+    argocd-image-updater.argoproj.io/backend.helm.image-name: backend.image.repository
+    argocd-image-updater.argoproj.io/backend.helm.image-tag: backend.image.tag
+    argocd-image-updater.argoproj.io/frontend.helm.image-name: frontend.image.repository
+    argocd-image-updater.argoproj.io/frontend.helm.image-tag: frontend.image.tag
 spec:
   destination:
     namespace: dev
