@@ -7,7 +7,7 @@
 *.tfplan.json
 .terraformrc
 terraform.rc
-
+terraform.tfvars
 # Terraform variables
 *.auto.tfvars
 *.auto.tfvars.json
