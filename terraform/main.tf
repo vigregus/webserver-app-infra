@@ -75,7 +75,30 @@ resource "kubernetes_secret" "github_token" {
 
   depends_on = [helm_release.argocd]
 }
+# ----- ImagePullSecret для GitHub Container Registry -----
+resource "kubernetes_secret" "ghcr_secret" {
+  metadata {
+    name      = "ghcr-secret"
+    namespace = kubernetes_namespace.argocd.metadata[0].name
+  }
 
+  type = "kubernetes.io/dockerconfigjson"
+
+  data = {
+    ".dockerconfigjson" = jsonencode({
+      auths = {
+        "ghcr.io" = {
+          username = "vigregus"
+          password = var.github_token
+          email    = "vigregus@gmail.com"
+          auth     = base64encode("vigregus:${var.github_token}")
+        }
+      }
+    })
+  }
+
+  depends_on = [helm_release.argocd]
+}
 
 # ----- App of Apps для GitOps -----
 resource "kubernetes_manifest" "webserver_app_of_apps" {
@@ -86,9 +109,7 @@ resource "kubernetes_manifest" "webserver_app_of_apps" {
       name      = "webserver-app-of-apps"
       namespace = kubernetes_namespace.argocd.metadata[0].name
       labels = {
-        "app.kubernetes.io/name"    = "webserver-app-of-apps"
-        "app.kubernetes.io/part-of" = "webserver-app"
-        "app.kubernetes.io/type"    = "app-of-apps"
+
       }
     }
     spec = {
