@@ -96,7 +96,7 @@ resource "kubernetes_manifest" "webserver_app_of_apps" {
       source = {
         repoURL        = "https://github.com/vigregus/webserver-app-infra.git"
         targetRevision = "main"
-        path           = "gitops"
+        path           = "gitops/1-root-apps"
         directory = {
           recurse = true
         }
