@@ -10,8 +10,8 @@ backend:
   name: backend
 
   image:
-    repository: webserver-app-backend
-    tag: "latest"
+    repository: webserver-app-back
+    tag: "1.0"
     pullPolicy: IfNotPresent
 
   service:
@@ -63,8 +63,8 @@ frontend:
   name: frontend
 
   image:
-    repository: webserver-app-frontend
-    tag: "latest"
+    repository: webserver-app-front
+    tag: "1.0"
     pullPolicy: IfNotPresent
 
   service:
