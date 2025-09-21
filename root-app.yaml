@@ -1,20 +1,29 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: apps-root
+  name: webserver-app-root
   namespace: argocd
+  labels:
+    app.kubernetes.io/name: webserver-app-root
+    app.kubernetes.io/part-of: webserver-app
 spec:
-  project: default
+  project: webserver-app
   source:
-    repoURL: https://github.com/your-org/your-apps-repo.git
+    repoURL: https://github.com/vigregus/webserver-app-infra.git
     targetRevision: main
-    path: apps
-    directory:
-      recurse: true  # читать все yaml внутри apps/
+    path: helm
+    helm:
+      valueFiles:
+        - values.yaml
   destination:
     server: https://kubernetes.default.svc
-    namespace: argocd
+    namespace: default
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+      - PruneLast=true
+  revisionHistoryLimit: 10
