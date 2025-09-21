@@ -13,8 +13,8 @@ metadata:
     argocd-image-updater.argoproj.io/allow-tags: regexp:^[0-9]+\.[0-9]+.*$
     argocd-image-updater.argoproj.io/git-commit-message: |
       Update {{.AppName}} to {{range .Images}}{{.Name}}:{{.Tag}} {{end}}
-    argocd-image-updater.argoproj.io/backend.pull-secret: secret:argocd/ghcr-secret#username#password
-    argocd-image-updater.argoproj.io/frontend.pull-secret: secret:argocd/ghcr-secret#username#password
+    argocd-image-updater.argoproj.io/backend.pull-secret: pullsecret:argocd/ghcr-secret
+    argocd-image-updater.argoproj.io/frontend.pull-secret: pullsecret:argocd/ghcr-secret
 spec:
   destination:
     namespace: dev
