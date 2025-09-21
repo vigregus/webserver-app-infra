@@ -11,7 +11,7 @@ variable "context" {
 }
 
 variable "github_token" {
-  description = "GitHub Personal Access Token for ArgoCD repository access"
+  description = "GitHub Personal Access Token with repo, packages, and org permissions"
   type        = string
   sensitive   = true
 }

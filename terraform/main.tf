@@ -5,7 +5,6 @@ terraform {
   }
 }
 
-# ----- Providers -----
 provider "kubernetes" {
   config_path    = var.kubeconfig
   config_context = var.context
@@ -23,21 +22,19 @@ resource "kubernetes_namespace" "argocd" {
   metadata { name = "argocd" }
 }
 
-# ----- Argo CD via Helm (с установкой CRD) -----
+# ----- ArgoCD via Helm -----
 resource "helm_release" "argocd" {
   name       = "argocd"
   namespace  = kubernetes_namespace.argocd.metadata[0].name
   repository = "https://argoproj.github.io/argo-helm"
   chart      = "argo-cd"
-  version    = "6.7.12" # при необходимости обнови до актуальной
+  version    = "6.7.12"
 
-  # Установить CRD из чарта (важно!)
   set {
     name  = "crds.install"
     value = "true"
   }
 
-  # Небольшая настройка: позволяем HTTP в dev (удобно для port-forward)
   values = [<<-YAML
     configs:
       params:
@@ -52,10 +49,10 @@ resource "helm_release" "argocd" {
   depends_on = [kubernetes_namespace.argocd]
 }
 
-# ----- GitHub токен для HTTPS -----
-resource "kubernetes_secret" "github_token" {
+# ----- GitHub Repository Secret (с правильным именем) -----
+resource "kubernetes_secret" "github_repo" {
   metadata {
-    name      = "github-token"
+    name      = "github-repo" # <-- Правильное имя
     namespace = kubernetes_namespace.argocd.metadata[0].name
     labels = {
       "argocd.argoproj.io/secret-type" = "repository"
@@ -65,16 +62,17 @@ resource "kubernetes_secret" "github_token" {
   type = "Opaque"
 
   data = {
-    type     = base64encode("git")
-    url      = base64encode("https://github.com/vigregus/webserver-app-infra.git")
-    name     = base64encode("webserver-app-infra")
-    project  = base64encode("default")
-    username = base64encode("vigregus")
-    password = base64encode(var.github_token)
+    type     = "git"
+    url      = "https://github.com/vigregus/webserver-app-infra.git"
+    name     = "webserver-app-infra"
+    project  = "default"
+    username = "vigregus"
+    password = var.github_token
   }
 
   depends_on = [helm_release.argocd]
 }
+
 # ----- ImagePullSecret для GitHub Container Registry -----
 resource "kubernetes_secret" "ghcr_secret" {
   metadata {
@@ -99,18 +97,14 @@ resource "kubernetes_secret" "ghcr_secret" {
 
   depends_on = [helm_release.argocd]
 }
-
-# ----- App of Apps для GitOps -----
-resource "kubernetes_manifest" "webserver_app_of_apps" {
+# ----- App of Apps -----
+resource "kubernetes_manifest" "app_of_apps" {
   manifest = {
     apiVersion = "argoproj.io/v1alpha1"
     kind       = "Application"
     metadata = {
       name      = "webserver-app-of-apps"
       namespace = kubernetes_namespace.argocd.metadata[0].name
-      labels = {
-
-      }
     }
     spec = {
       project = "default"
@@ -132,14 +126,11 @@ resource "kubernetes_manifest" "webserver_app_of_apps" {
           selfHeal = true
         }
         syncOptions = [
-          "CreateNamespace=true",
-          "PrunePropagationPolicy=foreground",
-          "PruneLast=true"
+          "CreateNamespace=true"
         ]
       }
-      revisionHistoryLimit = 10
     }
   }
 
-  depends_on = [kubernetes_secret.github_token]
+  depends_on = [kubernetes_secret.github_repo, kubernetes_secret.ghcr_secret]
 }

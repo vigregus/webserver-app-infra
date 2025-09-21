@@ -1,7 +1,8 @@
 # Global settings
 global:
-  imageRegistry: ""
-  imagePullSecrets: []
+  imageRegistry: "ghcr.io/vigregus"
+  imagePullSecrets:
+    - name: ghcr-secret
   storageClass: ""
 
 # Backend service configuration
