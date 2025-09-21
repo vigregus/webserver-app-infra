@@ -20,7 +20,7 @@ backend:
     port: 8000
     targetPort: 8000
 
-  replicaCount: 2
+  replicaCount: 1
 
   resources:
     limits:
@@ -73,7 +73,7 @@ frontend:
     port: 80
     targetPort: 80
 
-  replicaCount: 2
+  replicaCount: 1
 
   resources:
     limits:
