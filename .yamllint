@@ -1,33 +1,53 @@
 extends: default
 
 rules:
-  # Relax some rules for Helm charts
-  line-length:
-    max: 120
-    level: warning
-
+  braces:
+    max-spaces-inside: 1
+    min-spaces-inside: 0
+  brackets:
+    max-spaces-inside: 1
+    min-spaces-inside: 0
+  colons:
+    max-spaces-before: 0
+    max-spaces-after: 1
+  commas:
+    max-spaces-before: 0
+    max-spaces-after: 1
   comments:
     min-spaces-from-content: 1
-
+  comments-indentation: disable
+  document-start: disable
+  empty-lines:
+    max: 2
+    max-start: 0
+    max-end: 1
+  empty-values:
+    forbid-in-block-mappings: true
+    forbid-in-flow-mappings: true
+  hyphens:
+    max-spaces-after: 1
   indentation:
     spaces: 2
     indent-sequences: true
     check-multi-line-strings: false
-
+  key-duplicates: enable
+  key-ordering: disable
+  line-length:
+    max: 120
+    level: warning
+  new-line-at-end-of-file: enable
+  octal-values:
+    forbid-implicit-octal: true
+    forbid-explicit-octal: false
+  quoted-strings: disable
   truthy:
     allowed-values: ['true', 'false', 'on', 'off']
     check-keys: false
 
-  # Helm-specific rules
-  document-start:
-    present: false
-
-  # Allow multiple documents in one file
-  document-end:
-    present: false
-
 ignore: |
-  .git/
-  .terraform/
-  node_modules/
-  .pre-commit-config.yaml
+  helm/templates/
+  terraform/.terraform/
+  terraform/.terraform.lock.hcl
+  *.tfstate
+  *.tfstate.*
+  *.tfplan

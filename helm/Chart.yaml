@@ -1,0 +1,22 @@
+apiVersion: v2
+name: webserver-app
+description: Helm chart for deploying React frontend and FastAPI backend application
+
+type: application
+
+version: 1.0.0
+appVersion: "1.0.0"
+
+keywords:
+  - react
+  - fastapi
+  - web-application
+  - microservices
+
+home: https://github.com/your-org/webserver-app
+sources:
+  - https://github.com/your-org/webserver-app
+
+maintainers:
+  - name: Your Name
+    email: your.email@example.com

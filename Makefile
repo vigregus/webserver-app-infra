@@ -1,113 +1,125 @@
-# Makefile for Terraform and Helm linting
+# Makefile для управления тестовым приложением
 
-.PHONY: help install-linters lint lint-tf lint-helm fmt fmt-tf fmt-helm validate validate-tf validate-helm clean
+.PHONY: help build run stop clean logs shell test dev-backend dev-frontend
 
-# Variables
-TF_DIR = terraform
-HELM_DIR = .
-HELM_CHARTS = $(shell find . -name "Chart.yaml" -exec dirname {} \;)
+# Переменные
+BACKEND_DIR = app-backend
+FRONTEND_DIR = app-frontend
 
-# Help
-help: ## Show help
-	@echo "Available commands:"
+# Помощь
+help: ## Показать справку
+	@echo "Доступные команды:"
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
-# Install linters
-install-linters: ## Install Terraform and Helm linters
-	@echo "Installing Terraform linters..."
-	@if ! command -v tflint &> /dev/null; then \
-		brew install tflint || \
-		curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash; \
-	fi
-	@echo "Installing Helm linters..."
-	@if ! command -v helm &> /dev/null; then \
-		brew install helm || \
-		curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash; \
-	fi
-	@if ! command -v helm-unittest &> /dev/null; then \
-		helm plugin install https://github.com/quintush/helm-unittest; \
-	fi
-	@echo "Installing pre-commit hooks..."
-	@if ! command -v pre-commit &> /dev/null; then \
-		pip install pre-commit; \
-	fi
+# Docker команды
+build: ## Собрать все контейнеры
+	docker-compose build
 
-# Lint commands
-lint: lint-tf lint-helm ## Run all linters
+run: ## Запустить все сервисы
+	docker-compose up -d
 
-lint-tf: ## Lint Terraform code
-	@echo "🔍 Linting Terraform..."
-	@cd $(TF_DIR) && tflint --init
-	@cd $(TF_DIR) && tflint
-	@cd $(TF_DIR) && terraform fmt -check=true -diff=true -recursive=true
+stop: ## Остановить все сервисы
+	docker-compose down
 
-lint-helm: ## Lint Helm charts
-	@echo "🔍 Linting Helm charts..."
-	@for chart in $(HELM_CHARTS); do \
-		echo "Linting chart: $$chart"; \
-		helm lint $$chart || true; \
-		helm template $$chart --debug || true; \
-	done
+restart: ## Перезапустить все сервисы
+	docker-compose restart
 
-# Format commands
-fmt: fmt-tf fmt-helm ## Format all code
+logs: ## Показать логи всех сервисов
+	docker-compose logs -f
 
-fmt-tf: ## Format Terraform code
-	@echo "🎨 Formatting Terraform..."
-	@cd $(TF_DIR) && terraform fmt -recursive=true
+logs-backend: ## Показать логи бэкенда
+	docker-compose logs -f backend
 
-fmt-helm: ## Format Helm charts (basic validation)
-	@echo "🎨 Validating Helm charts..."
-	@for chart in $(HELM_CHARTS); do \
-		echo "Validating chart: $$chart"; \
-		helm template $$chart > /dev/null; \
-	done
+logs-frontend: ## Показать логи фронтенда
+	docker-compose logs -f frontend
 
-# Validate commands
-validate: validate-tf validate-helm ## Validate all configurations
+# Команды для разработки
+dev-backend: ## Запустить бэкенд в режиме разработки
+	cd $(BACKEND_DIR) && python -m venv venv && source venv/bin/activate && pip install -r requirements.txt && python main.py
 
-validate-tf: ## Validate Terraform configuration
-	@echo "✅ Validating Terraform..."
-	@cd $(TF_DIR) && terraform init -backend=false
-	@cd $(TF_DIR) && terraform validate
+dev-frontend: ## Запустить фронтенд в режиме разработки
+	cd $(FRONTEND_DIR) && npm install && npm run dev
 
-validate-helm: ## Validate Helm charts
-	@echo "✅ Validating Helm charts..."
-	@for chart in $(HELM_CHARTS); do \
-		echo "Validating chart: $$chart"; \
-		helm template $$chart --validate || true; \
-	done
+dev: ## Запустить оба сервиса в режиме разработки
+	@echo "Запуск бэкенда в режиме разработки..."
+	cd $(BACKEND_DIR) && python -m venv venv && source venv/bin/activate && pip install -r requirements.txt && python main.py &
+	@echo "Запуск фронтенда в режиме разработки..."
+	cd $(FRONTEND_DIR) && npm install && npm run dev
 
-# Security scanning
-security: ## Run security scans
-	@echo "🔒 Running security scans..."
-	@cd $(TF_DIR) && terraform init -backend=false
-	@cd $(TF_DIR) && terraform plan -var-file="var.tfvars" -out=tfplan
-	@cd $(TF_DIR) && terraform show -json tfplan > tfplan.json
-	@echo "Use tools like tfsec, checkov, or kube-score for detailed security analysis"
+# Управление контейнерами
+shell-backend: ## Подключиться к контейнеру бэкенда
+	docker-compose exec backend /bin/bash
 
-# Clean up
-clean: ## Clean up generated files
-	@echo "🧹 Cleaning up..."
-	@find . -name ".terraform" -type d -exec rm -rf {} + 2>/dev/null || true
-	@find . -name "*.tfplan" -delete 2>/dev/null || true
-	@find . -name "*.tfstate*" -not -name "*.tfstate" -delete 2>/dev/null || true
-	@find . -name "tfplan.json" -delete 2>/dev/null || true
+shell-frontend: ## Подключиться к контейнеру фронтенда
+	docker-compose exec frontend /bin/sh
 
-# Pre-commit setup
-setup-hooks: ## Setup pre-commit hooks
-	@echo "🪝 Setting up pre-commit hooks..."
-	@pre-commit install
-	@pre-commit install --hook-type commit-msg
+# Тестирование
+test-backend: ## Запустить тесты бэкенда
+	cd $(BACKEND_DIR) && python -m pytest
 
-# Run pre-commit on all files
-pre-commit-all: ## Run pre-commit on all files
-	@pre-commit run --all-files
+test-frontend: ## Запустить тесты фронтенда
+	cd $(FRONTEND_DIR) && npm test
 
-# CI/CD commands
-ci: install-linters lint validate ## Run CI pipeline
-	@echo "✅ CI pipeline completed successfully!"
+test: ## Запустить все тесты
+	$(MAKE) test-backend
+	$(MAKE) test-frontend
 
-# Development workflow
-dev: fmt lint validate ## Development workflow
-	@echo "🚀 Ready for development!"
+# Установка зависимостей
+install-backend: ## Установить зависимости бэкенда
+	cd $(BACKEND_DIR) && python -m venv venv && source venv/bin/activate && pip install -r requirements.txt
+
+install-frontend: ## Установить зависимости фронтенда
+	cd $(FRONTEND_DIR) && npm install
+
+install: ## Установить все зависимости
+	$(MAKE) install-backend
+	$(MAKE) install-frontend
+
+# Очистка
+clean: ## Очистить все контейнеры и образы
+	docker-compose down -v --rmi all
+	docker system prune -f
+
+clean-backend: ## Очистить бэкенд
+	cd $(BACKEND_DIR) && rm -rf venv __pycache__ .pytest_cache
+
+clean-frontend: ## Очистить фронтенд
+	cd $(FRONTEND_DIR) && rm -rf node_modules dist .vite
+
+clean-all: ## Полная очистка
+	$(MAKE) clean
+	$(MAKE) clean-backend
+	$(MAKE) clean-frontend
+
+# Проверка статуса
+status: ## Показать статус сервисов
+	docker-compose ps
+
+health: ## Проверить здоровье сервисов
+	@echo "Проверка бэкенда..."
+	@curl -f http://localhost:8000/health || echo "Бэкенд недоступен"
+	@echo "Проверка фронтенда..."
+	@curl -f http://localhost:3000 || echo "Фронтенд недоступен"
+
+# Быстрый старт
+quick-start: install build run ## Быстрый старт: установка, сборка, запуск
+	@echo "Приложение запущено!"
+	@echo "Фронтенд: http://localhost:3000"
+	@echo "Бэкенд: http://localhost:8000"
+	@echo "API документация: http://localhost:8000/docs"
+
+# Обновление
+update: ## Обновить зависимости
+	cd $(BACKEND_DIR) && source venv/bin/activate && pip install --upgrade -r requirements.txt
+	cd $(FRONTEND_DIR) && npm update
+
+# Линтинг
+lint-backend: ## Линтинг бэкенда
+	cd $(BACKEND_DIR) && source venv/bin/activate && python -m flake8 . --max-line-length=100
+
+lint-frontend: ## Линтинг фронтенда
+	cd $(FRONTEND_DIR) && npm run lint
+
+lint: ## Линтинг всего проекта
+	$(MAKE) lint-backend
+	$(MAKE) lint-frontend

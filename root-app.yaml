@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/your-org/your-apps-repo.git   # <-- ваш репозиторий
+    repoURL: https://github.com/your-org/your-apps-repo.git
     targetRevision: main
     path: apps
     directory:
