@@ -49,6 +49,19 @@ resource "helm_release" "argocd" {
   depends_on = [kubernetes_namespace.argocd]
 }
 
+resource "helm_release" "updater" {
+  name = "updater"
+
+  repository       = "https://argoproj.github.io/argo-helm"
+  chart            = "argocd-image-updater"
+  namespace        = "argocd"
+  create_namespace = true
+  version          = "0.8.4"
+
+  values     = [file("values/image-updater.yaml")]
+  depends_on = [helm_release.argocd]
+}
+
 # ----- GitHub Repository Secret (с правильным именем) -----
 resource "kubernetes_secret" "github_repo" {
   metadata {

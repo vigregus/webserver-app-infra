@@ -1,0 +1,16 @@
+---
+image:
+  tag: "v0.12.2"
+
+metrics:
+  enabled: true
+
+config:
+  registries:
+    - name: GitHub Container Registry
+      prefix: ghcr.io
+      api_url: https://ghcr.io
+      ping: yes
+      credentials: secret:argocd/ghcr-secret#username#password
+      default: true
+      limit: 20
