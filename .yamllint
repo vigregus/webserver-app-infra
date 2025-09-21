@@ -1,0 +1,33 @@
+extends: default
+
+rules:
+  # Relax some rules for Helm charts
+  line-length:
+    max: 120
+    level: warning
+
+  comments:
+    min-spaces-from-content: 1
+
+  indentation:
+    spaces: 2
+    indent-sequences: true
+    check-multi-line-strings: false
+
+  truthy:
+    allowed-values: ['true', 'false', 'on', 'off']
+    check-keys: false
+
+  # Helm-specific rules
+  document-start:
+    present: false
+
+  # Allow multiple documents in one file
+  document-end:
+    present: false
+
+ignore: |
+  .git/
+  .terraform/
+  node_modules/
+  .pre-commit-config.yaml

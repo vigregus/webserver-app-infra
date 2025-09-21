@@ -1,0 +1,180 @@
+# Terraform
+.terraform/
+.terraform.lock.hcl
+*.tfstate
+*.tfstate.*
+*.tfplan
+*.tfplan.json
+.terraformrc
+terraform.rc
+
+# Terraform variables
+*.auto.tfvars
+*.auto.tfvars.json
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Crash log files
+crash.log
+crash.*.log
+
+# Exclude all .tfvars files, which are likely to contain sensitive data
+*.tfvars
+*.tfvars.json
+# But allow var.tfvars for this project
+!var.tfvars
+
+# Ignore CLI configuration files
+.terraformrc
+terraform.rc
+
+# Helm
+charts/
+Chart.lock
+requirements.lock
+
+# Kubernetes
+*.kubeconfig
+kubeconfig*
+
+# Secrets and sensitive files
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+secrets.yaml
+secrets.yml
+.secrets.baseline
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+logs/
+*.out
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# Node.js (if using any JS tools)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Python (if using any Python tools)
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Pre-commit
+.pre-commit-config.yaml.bak
+
+# Makefile backups
+Makefile.bak
+
+# Local development
+.local/
+local/
+dev/
+development/
+
+# Backup files
+*.orig
+*.rej
+*.patch
+
+# Archive files
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# Documentation builds
+docs/_build/
+site/
+
+# Test coverage
+coverage/
+.coverage
+*.cover
+*.py,cover
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# pipenv
+Pipfile.lock
+
+# PEP 582
+__pypackages__/
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# pytype static type analyzer
+.pytype/
+
+# Cython debug symbols
+cython_debug/
