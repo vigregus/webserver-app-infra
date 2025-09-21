@@ -10,8 +10,8 @@ variable "context" {
   default     = "minikube"
 }
 
-variable "github_ssh_private_key" {
-  description = "GitHub SSH private key for ArgoCD repository access"
+variable "github_token" {
+  description = "GitHub Personal Access Token for ArgoCD repository access"
   type        = string
   sensitive   = true
 }

@@ -52,10 +52,10 @@ resource "helm_release" "argocd" {
   depends_on = [kubernetes_namespace.argocd]
 }
 
-# ----- SSH ключ для GitHub -----
-resource "kubernetes_secret" "github_ssh_key" {
+# ----- GitHub токен для HTTPS -----
+resource "kubernetes_secret" "github_token" {
   metadata {
-    name      = "github-ssh-key"
+    name      = "github-token"
     namespace = kubernetes_namespace.argocd.metadata[0].name
     labels = {
       "argocd.argoproj.io/secret-type" = "repository"
@@ -65,15 +65,17 @@ resource "kubernetes_secret" "github_ssh_key" {
   type = "Opaque"
 
   data = {
-    type          = base64encode("git")
-    url           = base64encode("git@github.com:vigregus/webserver-app-infra.git")
-    name          = base64encode("webserver-app-infra")
-    project       = base64encode("default")
-    sshPrivateKey = base64encode(var.github_ssh_private_key)
+    type     = base64encode("git")
+    url      = base64encode("https://github.com/vigregus/webserver-app-infra.git")
+    name     = base64encode("webserver-app-infra")
+    project  = base64encode("default")
+    username = base64encode("vigregus")
+    password = base64encode(var.github_token)
   }
 
   depends_on = [helm_release.argocd]
 }
+
 
 # ----- App of Apps для GitOps -----
 resource "kubernetes_manifest" "webserver_app_of_apps" {
@@ -92,9 +94,12 @@ resource "kubernetes_manifest" "webserver_app_of_apps" {
     spec = {
       project = "default"
       source = {
-        repoURL        = "git@github.com:vigregus/webserver-app-infra.git"
+        repoURL        = "https://github.com/vigregus/webserver-app-infra.git"
         targetRevision = "main"
         path           = "gitops"
+        directory = {
+          recurse = true
+        }
       }
       destination = {
         server    = "https://kubernetes.default.svc"
@@ -115,5 +120,5 @@ resource "kubernetes_manifest" "webserver_app_of_apps" {
     }
   }
 
-  depends_on = [kubernetes_secret.github_ssh_key]
+  depends_on = [kubernetes_secret.github_token]
 }
