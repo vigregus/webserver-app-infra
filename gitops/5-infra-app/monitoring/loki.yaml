@@ -15,6 +15,7 @@ spec:
     helm:
       values: |
         loki:
+          deploymentMode: SingleBinary
           auth_enabled: false
           commonConfig:
             replication_factor: 1
@@ -48,6 +49,12 @@ spec:
             size: 10Gi
         service:
           type: ClusterIP
+        simpleScalable:
+          replicas:
+            read: 0
+            write: 0
+            backend: 0
+            queryScheduler: 0
   syncPolicy:
     automated:
       prune: true
