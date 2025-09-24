@@ -24,7 +24,7 @@ spec:
   destination:
     namespace: dev
     server: https://kubernetes.default.svc
-  project: webserver-apps
+  project: default
   source:
     repoURL: https://github.com/vigregus/webserver-app-infra.git
     targetRevision: main
