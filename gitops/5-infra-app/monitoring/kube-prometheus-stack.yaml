@@ -21,6 +21,13 @@ spec:
             type: ClusterIP
           adminUser: admin
           adminPassword: admin
+          ingress:
+            enabled: true
+            ingressClassName: nginx
+            hosts:
+              - grafana.local
+            path: /
+            pathType: Prefix
 
         prometheus:
           service:
