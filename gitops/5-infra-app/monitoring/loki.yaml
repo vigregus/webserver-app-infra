@@ -20,6 +20,10 @@ spec:
             replication_factor: 1
           storage:
             type: filesystem
+            bucketNames:
+              chunks: chunks
+              ruler: ruler
+              admin: admin
             filesystem:
               chunks_directory: /var/loki/chunks
               rules_directory: /var/loki/rules
@@ -39,6 +43,9 @@ spec:
                 directory: /var/loki/rules
         singleBinary:
           replicas: 1
+          persistence:
+            enabled: true
+            size: 10Gi
         service:
           type: ClusterIP
   syncPolicy:
