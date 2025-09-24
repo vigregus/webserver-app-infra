@@ -15,6 +15,7 @@ spec:
     targetRevision: 61.3.2
     chart: kube-prometheus-stack
     helm:
+      releaseName: kp-stack
       values: |
         grafana:
           enabled: true
