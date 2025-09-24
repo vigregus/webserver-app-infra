@@ -38,9 +38,14 @@ spec:
 
         alertmanager:
           enabled: true
+
+        crds:
+          enabled: false
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+      - Replace=true
+      - SkipDryRunOnMissingResource=true
