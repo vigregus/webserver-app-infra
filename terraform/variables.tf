@@ -7,7 +7,7 @@ variable "kubeconfig" {
 variable "context" {
   description = "Kubernetes context name"
   type        = string
-  default     = "minikube"
+  default     = "multi"
 }
 
 variable "github_token" {

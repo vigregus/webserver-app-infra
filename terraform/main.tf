@@ -2,6 +2,8 @@ terraform {
   required_providers {
     kubernetes = { source = "hashicorp/kubernetes", version = "2.32.0" }
     helm       = { source = "hashicorp/helm", version = "2.13.2" }
+    null       = { source = "hashicorp/null", version = "3.2.2" }
+    time       = { source = "hashicorp/time", version = "0.11.0" }
   }
 }
 
@@ -110,6 +112,7 @@ resource "kubernetes_secret" "ghcr_secret" {
 
   depends_on = [helm_release.argocd]
 }
+
 # ----- App of Apps -----
 resource "kubernetes_manifest" "app_of_apps" {
   manifest = {
@@ -145,5 +148,9 @@ resource "kubernetes_manifest" "app_of_apps" {
     }
   }
 
-  depends_on = [kubernetes_secret.github_repo, kubernetes_secret.ghcr_secret]
+  depends_on = [
+    kubernetes_secret.github_repo,
+    kubernetes_secret.ghcr_secret,
+    helm_release.argocd
+  ]
 }
