@@ -4,7 +4,7 @@ helm:
     value: ghcr.io/vigregus/webserver-app-back
     forcestring: true
   - name: backend.image.tag
-    value: dev-20250924-171301-48f562e
+    value: dev-20250924-185140-48f562e
     forcestring: true
   - name: frontend.image.repository
     value: ghcr.io/vigregus/webserver-app-front
