@@ -2,7 +2,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: dev-watcher
+  name: stage-watcher
   namespace: argocd
   annotations:
     argocd.argoproj.io/sync-wave: "1"
@@ -10,7 +10,7 @@ spec:
   source:
     repoURL: https://github.com/vigregus/webserver-app-infra.git
     targetRevision: main
-    path: gitops/3-apps/dev
+    path: gitops/3-apps/stage
     directory:
       recurse: true
   destination:
