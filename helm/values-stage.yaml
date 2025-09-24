@@ -1,8 +1,8 @@
 # Production environment values
-replicaCount: 3
+replicaCount: 2
 
 backend:
-  replicaCount: 3
+  replicaCount: 2
   resources:
     limits:
       cpu: 1000m
@@ -12,12 +12,12 @@ backend:
       memory: 512Mi
   autoscaling:
     enabled: true
-    minReplicas: 3
+    minReplicas: 2
     maxReplicas: 10
     targetCPUUtilizationPercentage: 70
 
 frontend:
-  replicaCount: 3
+  replicaCount: 32
   resources:
     limits:
       cpu: 500m
@@ -27,12 +27,12 @@ frontend:
       memory: 256Mi
   autoscaling:
     enabled: true
-    minReplicas: 3
+    minReplicas: 2
     maxReplicas: 10
     targetCPUUtilizationPercentage: 70
 
 ingress:
-  enabled: true
+  enabled: false
   className: "nginx"
   annotations:
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
@@ -61,7 +61,7 @@ services:
 
 podDisruptionBudget:
   enabled: true
-  minAvailable: 2
+  minAvailable: 1
 
 serviceMonitor:
   enabled: true
