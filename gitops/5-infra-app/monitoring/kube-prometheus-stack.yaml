@@ -50,6 +50,10 @@ spec:
 
         prometheusOperator:
           enabled: true
+          admissionWebhooks:
+            enabled: false
+            patch:
+              enabled: false
 
         alertmanager:
           enabled: true
