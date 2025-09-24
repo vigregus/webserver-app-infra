@@ -42,13 +42,24 @@ spec:
               type: local
               local:
                 directory: /var/loki/rules
+          canary:
+            enabled: false
+        chunksCache:
+          enabled: false
+        resultsCache:
+          enabled: false
         singleBinary:
           replicas: 1
           persistence:
             enabled: true
             size: 10Gi
         service:
+          enabled: true
           type: ClusterIP
+          ports:
+            - name: http
+              port: 3100
+              targetPort: 3100
         # Явно обнулим simple scalable таргеты
         read:
           enabled: false
