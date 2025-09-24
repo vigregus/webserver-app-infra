@@ -1,0 +1,37 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: infra-apps
+  namespace: argocd
+spec:
+  description: "Infra applications"
+  clusterResourceWhitelist:
+    - group: "*"
+      kind: "*"
+  destinations:
+    - namespace: "*"
+      server: "*"
+  sourceRepos:
+    - "*"
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: infra-root-app
+  namespace: argocd
+spec:
+  source:
+    repoURL: https://github.com/vigregus/webserver-app-infra.git
+    path: gitops/4-infra-watchers
+    targetRevision: main
+    directory:
+      recurse: true
+  destination:
+    namespace: argocd
+    server: https://kubernetes.default.svc
+  project: infra-apps
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions: []
