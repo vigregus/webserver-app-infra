@@ -13,8 +13,24 @@ spec:
     targetRevision: 61.3.2
     chart: kube-prometheus-stack
     helm:
-      valueFiles:
-        - kube-prometheus-values.yaml
+      values: |
+        grafana:
+          enabled: true
+          defaultDashboardsEnabled: true
+          service:
+            type: ClusterIP
+          adminUser: admin
+          adminPassword: admin
+
+        prometheus:
+          service:
+            type: ClusterIP
+
+        prometheusOperator:
+          enabled: true
+
+        alertmanager:
+          enabled: true
   syncPolicy:
     automated:
       prune: true
