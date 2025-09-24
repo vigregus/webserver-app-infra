@@ -24,12 +24,16 @@ spec:
           adminUser: admin
           adminPassword: admin
           ingress:
-            enabled: true
+            enabled: false
             ingressClassName: nginx
             hosts:
               - grafana.local
             path: /
             pathType: Prefix
+          sidecar:
+            datasources:
+              enabled: true
+              defaultDatasourceEnabled: true
           additionalDataSources:
             - name: Loki
               type: loki
