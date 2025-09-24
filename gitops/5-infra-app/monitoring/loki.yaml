@@ -51,12 +51,16 @@ spec:
           type: ClusterIP
         # Явно обнулим simple scalable таргеты
         read:
+          enabled: false
           replicas: 0
         write:
+          enabled: false
           replicas: 0
         backend:
+          enabled: false
           replicas: 0
         queryScheduler:
+          enabled: false
           replicas: 0
         gateway:
           enabled: false
