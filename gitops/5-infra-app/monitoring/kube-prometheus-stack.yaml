@@ -34,6 +34,9 @@ spec:
             datasources:
               enabled: true
               defaultDatasourceEnabled: true
+            dashboards:
+              enabled: true
+              label: grafana_dashboard
           additionalDataSources:
             - name: Loki
               type: loki

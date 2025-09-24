@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-dashboard
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
+  backend-dashboard.json: |
+    {
+      "title": "Backend Overview",
+      "schemaVersion": 36,
+      "panels": [
+        {
+          "type": "stat",
+          "title": "Users total",
+          "targets": [
+            { "expr": "app_users_total" }
+          ],
+          "gridPos": {"x": 0, "y": 0, "w": 8, "h": 5}
+        },
+        {
+          "type": "timeseries",
+          "title": "Requests rate",
+          "targets": [
+            { "expr": "sum by (endpoint,method) (rate(app_requests_total[1m]))" }
+          ],
+          "gridPos": {"x": 8, "y": 0, "w": 16, "h": 8}
+        },
+        {
+          "type": "logs",
+          "title": "Backend logs",
+          "gridPos": {"x": 0, "y": 8, "w": 24, "h": 10},
+          "options": { "dedupStrategy": "none" }
+        }
+      ]
+    }
