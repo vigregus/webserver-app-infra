@@ -10,11 +10,13 @@ spec:
     namespace: argo-rollouts
   source:
     repoURL: https://argoproj.github.io/argo-helm
-    targetRevision: 2.36.8
     chart: argo-rollouts
     helm:
-      valueFiles:
-        - rollouts-values.yaml
+      values: |
+        controller:
+          replicas: 1
+        dashboard:
+          enabled: true
   syncPolicy:
     automated:
       prune: true
