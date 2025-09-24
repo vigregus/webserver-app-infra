@@ -10,7 +10,7 @@ metadata:
     argocd-image-updater.argoproj.io/write-back-method: git
     argocd-image-updater.argoproj.io/git-branch: main
     argocd-image-updater.argoproj.io/update-strategy: latest
-    argocd-image-updater.argoproj.io/backend.allow-tags: glob:dev-*
+    argocd-image-updater.argoproj.io/backend.allow-tags: regexp:^dev-.*$
     argocd-image-updater.argoproj.io/backend.force-update: "true"
     argocd-image-updater.argoproj.io/frontend.allow-tags: regexp:^[0-9]+\.[0-9]+.*$
     argocd-image-updater.argoproj.io/git-commit-message: |
