@@ -2,7 +2,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: dev-watcher
+  name: infra-watcher
   namespace: argocd
   annotations:
     argocd.argoproj.io/sync-wave: "1"
@@ -10,7 +10,7 @@ spec:
   source:
     repoURL: https://github.com/vigregus/webserver-app-infra.git
     targetRevision: main
-    path: gitops/5-infra-apps
+    path: gitops/5-infra-app
     directory:
       recurse: true
   destination:
