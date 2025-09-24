@@ -49,12 +49,17 @@ spec:
             size: 10Gi
         service:
           type: ClusterIP
-        simpleScalable:
-          replicas:
-            read: 0
-            write: 0
-            backend: 0
-            queryScheduler: 0
+        # Явно обнулим simple scalable таргеты
+        read:
+          replicas: 0
+        write:
+          replicas: 0
+        backend:
+          replicas: 0
+        queryScheduler:
+          replicas: 0
+        gateway:
+          enabled: false
   syncPolicy:
     automated:
       prune: true
