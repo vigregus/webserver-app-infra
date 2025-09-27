@@ -13,7 +13,7 @@ spec:
   source:
     repoURL: https://grafana.github.io/helm-charts
     chart: promtail
-    targetRevision: ""                   # можно зафиксировать
+    targetRevision: "6.17.0"
     helm:
       releaseName: promtail
       values: |

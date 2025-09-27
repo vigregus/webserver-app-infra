@@ -13,7 +13,7 @@ spec:
   source:
     repoURL: https://prometheus-community.github.io/helm-charts
     chart: kube-prometheus-stack
-    targetRevision: ""                 # можно оставить пустым (последняя) или зафиксировать
+    targetRevision: "77.11.1"
     helm:
       releaseName: kube-prom-stack
       values: |
