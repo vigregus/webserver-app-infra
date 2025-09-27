@@ -18,7 +18,7 @@ spec:
       releaseName: loki
       values: |
         # Минимальная конфигурация для миникуб
-        loki:
+             loki:
           config: |
             {{- .Files.Get "loki-config.yaml" | nindent 12 }}
         persistence:
@@ -35,8 +35,34 @@ spec:
           requests:
             cpu: 100m
             memory: 128Mi
+        # Настройка для single binary режима
         singleBinary:
           replicas: 1
+        # Отключаем все остальные компоненты
+        read:
+          replicas: 0
+        write:
+          replicas: 0
+        backend:
+          replicas: 0
+        gateway:
+          replicas: 0
+        indexGateway:
+          enabled: false
+        ruler:
+          enabled: false
+        compactor:
+          enabled: false
+        distributor:
+          enabled: false
+        querier:
+          enabled: false
+        queryFrontend:
+          enabled: false
+        ingester:
+          enabled: false
+        tableManager:
+          enabled: false
   syncPolicy:
     automated:
       prune: true
