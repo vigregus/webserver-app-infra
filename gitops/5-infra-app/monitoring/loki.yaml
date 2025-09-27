@@ -9,21 +9,21 @@ spec:
   project: default
   destination:
     server: https://kubernetes.default.svc
-    namespace: logging
+    namespace: logging # Убедитесь, что namespace 'logging' существует (или используйте CreateNamespace=true)
   source:
     repoURL: https://grafana.github.io/helm-charts
     chart: loki
-    targetRevision: "6.41.1"
+    targetRevision: "6.41.1" # Используйте актуальную стабильную версию
     helm:
       releaseName: loki
-      # !!! ВАЖНО: Весь текст ниже должен иметь отступ ТОЛЬКО на 2 пробела
+      # ВАЖНО: Все строки под 'values: |' должны иметь ОДИНАКОВЫЙ отступ (обычно 2 пробела)
       values: |
         deploymentMode: SingleBinary
 
         singleBinary:
           replicas: 1
 
-          # Дадим процессу права на том через fsGroup
+          # Настройки безопасности, необходимые для записи в /var/loki
           podSecurityContext:
             fsGroup: 10001
             fsGroupChangePolicy: OnRootMismatch
@@ -33,7 +33,7 @@ spec:
             runAsGroup: 10001
             runAsNonRoot: true
 
-          # Том во временную память узла
+          # Используем временный том узла (emptyDir)
           extraVolumes:
             - name: loki-data
               emptyDir: {}
@@ -41,18 +41,19 @@ spec:
             - name: loki-data
               mountPath: /var/loki
 
-          # Init-контейнер для исправления прав (должен решить проблему 'permission denied')
+          # Init-контейнер для гарантированного исправления прав доступа (PERMISSION DENIED FIX)
           extraInitContainers:
             - name: fix-perms
               image: busybox:1.36
+              # Создаем необходимые папки и устанавливаем владельца 10001:10001
               command: ["sh","-c","mkdir -p /var/loki/chunks /var/loki/index/locks && chown -R 10001:10001 /var/loki"]
               securityContext:
-                runAsUser: 0
+                runAsUser: 0 # Должен работать от root, чтобы изменить владельца
               volumeMounts:
                 - name: loki-data
                   mountPath: /var/loki
 
-        # Отключаем PVC
+        # Отключаем PersistentVolumeClaim, так как используем emptyDir
         persistence:
           enabled: false
 
@@ -60,19 +61,22 @@ spec:
           serviceMonitor:
             enabled: true
 
-        # Конфиг Loki
         loki:
+          # Отключаем Memberlist для упрощения, так как реплика всего одна
           memberlistConfig:
             join_members: []
 
+          # Настройки хранилища для Helm-шаблонов
           storage:
             use_thanos_objstore: false
             bucketNames: { chunks: chunks, ruler: ruler, admin: admin }
 
+          # Конфиг самого Loki
           structuredConfig:
             auth_enabled: false
             server:
               http_listen_port: 3100
+
             memberlist:
               join_members: []
 
@@ -86,14 +90,14 @@ spec:
                   replication_factor: 1
                 final_sleep: 0s
 
-            # Локальное хранение
+            # Локальное хранение на смонтированном томе (/var/loki)
             storage_config:
               filesystem:
                 directory: /var/loki/chunks
               boltdb:
                 directory: /var/loki/index
 
-        # Отключение всех лишних компонентов
+        # Отключаем все компоненты, кроме singleBinary (они по умолчанию включены в chart'е)
         read:          { replicas: 0 }
         write:         { replicas: 0 }
         backend:       { replicas: 0 }
