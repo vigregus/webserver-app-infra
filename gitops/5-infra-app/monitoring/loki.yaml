@@ -9,7 +9,7 @@ spec:
   project: default
   destination:
     server: https://kubernetes.default.svc
-    namespace: monitoring
+    namespace: logging
   source:
     repoURL: https://grafana.github.io/helm-charts
     chart: loki
@@ -18,7 +18,7 @@ spec:
       releaseName: loki
       values: |
         # Минимальная конфигурация для миникуб
-             loki:
+        loki:
           config: |
             {{- .Files.Get "loki-config.yaml" | nindent 12 }}
         persistence:
@@ -35,7 +35,8 @@ spec:
           requests:
             cpu: 100m
             memory: 128Mi
-        # Настройка для single binary режима
+        # Используем single binary режим
+        deploymentMode: SingleBinary
         singleBinary:
           replicas: 1
         # Отключаем все остальные компоненты
