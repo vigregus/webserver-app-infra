@@ -2,6 +2,17 @@
 replicaCount: 2
 
 backend:
+  config:
+    apiUrl: "http://webserver-app-backend-stage:8000"
+    version: "1.0.0-stage"
+    environment: "staging"
+    features:
+      metrics: true
+      cors: true
+      rateLimit: true
+    limits:
+      maxUsers: 500
+      maxAge: 100
   replicaCount: 2
   resources:
     limits:

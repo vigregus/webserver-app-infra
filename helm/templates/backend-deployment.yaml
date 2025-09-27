@@ -43,6 +43,8 @@ spec:
               protocol: TCP
           env:
             {{- toYaml .Values.backend.env | nindent 12 }}
+            - name: API_CONFIG_PATH
+              value: "/app/config/api-config.json"
           {{- if .Values.backend.healthCheck.enabled }}
           livenessProbe:
             httpGet:
@@ -64,11 +66,17 @@ spec:
           resources:
             {{- toYaml .Values.backend.resources | nindent 12 }}
           volumeMounts:
+            - name: config-volume
+              mountPath: /app/config
+              readOnly: true
             {{- if .Values.persistence.enabled }}
             - name: logs
               mountPath: /app/logs
             {{- end }}
       volumes:
+        - name: config-volume
+          configMap:
+            name: {{ include "webserver-app.backend.fullname" . }}-config
         {{- if .Values.persistence.enabled }}
         - name: logs
           persistentVolumeClaim:

@@ -58,6 +58,18 @@ backend:
     timeoutSeconds: 5
     failureThreshold: 3
 
+  config:
+    apiUrl: "http://webserver-app-backend:8000"
+    version: "1.0.0"
+    environment: "production"
+    features:
+      metrics: true
+      cors: true
+      rateLimit: false
+    limits:
+      maxUsers: 1000
+      maxAge: 120
+
 # Frontend service configuration
 frontend:
   enabled: true

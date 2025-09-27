@@ -2,6 +2,17 @@
 replicaCount: 1
 
 backend:
+  config:
+    apiUrl: "http://webserver-app-backend-dev:8000"
+    version: "1.0.0-dev"
+    environment: "development"
+    features:
+      metrics: true
+      cors: true
+      rateLimit: false
+    limits:
+      maxUsers: 100
+      maxAge: 80
   replicaCount: 1
   resources:
     limits:

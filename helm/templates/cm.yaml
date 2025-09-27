@@ -1,0 +1,24 @@
+{{- if .Values.backend.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "webserver-app.backend.fullname" . }}-config
+  labels:
+    {{- include "webserver-app.backend.labels" . | nindent 4 }}
+data:
+  api-config.json: |
+    {
+      "apiUrl": "{{ .Values.backend.config.apiUrl }}",
+      "version": "{{ .Values.backend.config.version }}",
+      "environment": "{{ .Values.backend.config.environment }}",
+      "features": {
+        "metrics": {{ .Values.backend.config.features.metrics | toJson }},
+        "cors": {{ .Values.backend.config.features.cors | toJson }},
+        "rateLimit": {{ .Values.backend.config.features.rateLimit | toJson }}
+      },
+      "limits": {
+        "maxUsers": {{ .Values.backend.config.limits.maxUsers }},
+        "maxAge": {{ .Values.backend.config.limits.maxAge }}
+      }
+    }
+{{- end }}
