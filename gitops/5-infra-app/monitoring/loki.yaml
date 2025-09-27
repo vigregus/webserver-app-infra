@@ -21,51 +21,43 @@ spec:
         singleBinary:
           replicas: 1
 
-        # лёгкие ресурсы для minikube
+        loki:
+          useTestSchema: true
+          storage:
+            use_thanos_objstore: false
+            bucketNames:
+              chunks: chunks
+              ruler: ruler
+              admin: admin
+
+          # ВАЖНО: storage_config под boltdb, без boltdb_shipper/shared_store
+          storage_config:
+            filesystem:
+              directory: /var/loki/chunks
+            boltdb:
+              directory: /var/loki/index
+
         resources:
-          requests: { cpu: 50m,  memory: 128Mi }
+          requests: { cpu: 50m, memory: 128Mi }
           limits:   { cpu: 200m, memory: 256Mi }
 
         monitoring:
           serviceMonitor:
             enabled: true
 
-        # КЛЮЧЕВОЕ: добавляем minimal loki.storage, чтобы helpers не падали
-        loki:
-          useTestSchema: true                # можно; для простого стенда
-          storage:
-            use_thanos_objstore: false
-            bucketNames:                     # дефолтные имена "бакетов" (нужны helper-у)
-              chunks: chunks
-              ruler: ruler
-              admin: admin
-
-          # на всякий случай — явный filesystem storage_config (совместим с testSchema)
-          storage_config:
-            filesystem:
-              directory: /var/loki/chunks
-            boltdb_shipper:
-              shared_store: filesystem
-              active_index_directory: /var/loki/index
-              cache_location: /var/loki/index-cache
-
-        # persistence по желанию (оставь выключенным для самого минимума)
-        persistence:
-          enabled: false
-
-        # выключаем остальные роли
-        read:          { replicas: 0 }
-        write:         { replicas: 0 }
-        backend:       { replicas: 0 }
-        gateway:       { replicas: 0 }
-        indexGateway:  { enabled:  false }
-        ruler:         { enabled:  false }
-        compactor:     { enabled:  false }
-        distributor:   { enabled:  false }
-        querier:       { enabled:  false }
-        queryFrontend: { enabled:  false }
-        ingester:      { enabled:  false }
-        tableManager:  { enabled:  false }
+        # отключаем лишние роли
+        read: { replicas: 0 }
+        write: { replicas: 0 }
+        backend: { replicas: 0 }
+        gateway: { replicas: 0 }
+        indexGateway: { enabled: false }
+        ruler: { enabled: false }
+        compactor: { enabled: false }
+        distributor: { enabled: false }
+        querier: { enabled: 0 }
+        queryFrontend: { enabled: 0 }
+        ingester: { enabled: 0 }
+        tableManager: { enabled: 0 }
   syncPolicy:
     automated: { prune: true, selfHeal: true }
     syncOptions: [ "CreateNamespace=true", "ServerSideApply=true" ]
