@@ -24,15 +24,29 @@ spec:
             requests: { cpu: 50m,  memory: 128Mi }
             limits:   { cpu: 200m, memory: 256Mi }
 
+        # ЯВНО обнуляем все simple-scalable роли (чтобы не ругался validator)
+        read:          { replicas: 0 }
+        write:         { replicas: 0 }
+        backend:       { replicas: 0 }
+        gateway:       { replicas: 0 }
+        distributor:   { enabled: false }
+        ingester:      { enabled: false }
+        querier:       { enabled: false }
+        queryFrontend: { enabled: false }
+        compactor:     { enabled: false }
+        ruler:         { enabled: false }
+        indexGateway:  { enabled: false }
+        tableManager:  { enabled: false }
+
         monitoring:
           serviceMonitor:
             enabled: true
 
         loki:
-          # оставляем тестовую схему -> store: boltdb
+          # используем test-schema => store: boltdb (без boltdb_shipper)
           useTestSchema: true
 
-          # это нужно шаблонам чарта, не влияет на runtime при FS
+          # минимальный блок, которого требуют шаблоны
           storage:
             use_thanos_objstore: false
             bucketNames:
@@ -40,13 +54,12 @@ spec:
               ruler:  ruler
               admin:  admin
 
-          # РЕАЛЬНЫЙ конфиг Loki как map (без max_transfer_retries и без boltdb_shipper)
+          # реальный конфиг loki: НИКАКОГО boltdb_shipper и НИКАКОГО max_transfer_retries
           structuredConfig:
             auth_enabled: false
             server:
               http_listen_port: 3100
 
-            # простое кольцо в single-binary
             ingester:
               chunk_idle_period: 5m
               chunk_retain_period: 30s
@@ -58,7 +71,6 @@ spec:
                   replication_factor: 1
                 final_sleep: 0s
 
-            # test-schema -> boltdb (без shared_store)
             storage_config:
               filesystem:
                 directory: /var/loki/chunks
