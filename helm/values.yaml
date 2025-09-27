@@ -170,17 +170,3 @@ podDisruptionBudget:
 # Network Policies
 networkPolicy:
   enabled: false
-
-# ServiceMonitor for Prometheus
-serviceMonitor:
-  enabled: false
-  interval: 30s
-  scrapeTimeout: 10s
-  labels: {}
-
-# Persistent Volume for logs (optional)
-persistence:
-  enabled: false
-  storageClass: ""
-  accessMode: ReadWriteOnce
-  size: 1Gi

@@ -62,10 +62,3 @@ services:
 podDisruptionBudget:
   enabled: true
   minAvailable: 1
-
-serviceMonitor:
-  enabled: false
-  interval: 30s
-  scrapeTimeout: 10s
-  labels:
-    prometheus: kube-prometheus
