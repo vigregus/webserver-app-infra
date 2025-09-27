@@ -21,51 +21,35 @@ spec:
         singleBinary:
           replicas: 1
           resources:
-            requests: { cpu: 50m, memory: 128Mi }
-            limits: { cpu: 200m, memory: 256Mi }
+            requests: { cpu: 50m,  memory: 128Mi }
+            limits:   { cpu: 200m, memory: 256Mi }
 
         monitoring:
           serviceMonitor:
             enabled: true
 
         loki:
-          # ОБЯЗАТЕЛЬНО отключаем тестовую схему
-          useTestSchema: false
+          # оставляем тестовую схему -> store: boltdb
+          useTestSchema: true
 
-          # Требование чарта: отдельный schemaConfig (валидатор смотрит сюда)
-          schemaConfig:
-            configs:
-              - from: "2020-10-24"
-                store: boltdb-shipper
-                object_store: filesystem
-                schema: v13
-                index:
-                  prefix: index_
-                  period: 24h
-
-          # Минимально нужная секция storage для helper-ов чарта
+          # это нужно шаблонам чарта, не влияет на runtime при FS
           storage:
             use_thanos_objstore: false
             bucketNames:
               chunks: chunks
-              ruler: ruler
-              admin: admin
+              ruler:  ruler
+              admin:  admin
 
-          # Реальный конфиг Loki — цельно в structuredConfig
+          # РЕАЛЬНЫЙ конфиг Loki как map (без max_transfer_retries и без boltdb_shipper)
           structuredConfig:
             auth_enabled: false
             server:
               http_listen_port: 3100
 
-            # ring в single-binary (inmemory memberlist)
-            memberlist:
-              join_members:
-                - "loki-memberlist"
-
+            # простое кольцо в single-binary
             ingester:
               chunk_idle_period: 5m
               chunk_retain_period: 30s
-              max_transfer_retries: 0
               lifecycler:
                 address: 127.0.0.1
                 ring:
@@ -74,38 +58,12 @@ spec:
                   replication_factor: 1
                 final_sleep: 0s
 
-            # СХЕМА + ХРАНИЛИЩЕ — ТУТ ЖЕ (и она совпадает со schemaConfig выше)
-            schema_config:
-              configs:
-                - from: "2020-10-24"
-                  store: boltdb-shipper
-                  object_store: filesystem
-                  schema: v13
-                  index:
-                    prefix: index_
-                    period: 24h
-
+            # test-schema -> boltdb (без shared_store)
             storage_config:
               filesystem:
                 directory: /var/loki/chunks
-              boltdb_shipper:
-                active_index_directory: /var/loki/index
-                cache_location: /var/loki/index-cache
-                shared_store: filesystem
-
-        # Всё лишнее выключено
-        read: { replicas: 0 }
-        write: { replicas: 0 }
-        backend: { replicas: 0 }
-        gateway: { replicas: 0 }
-        indexGateway: { enabled: false }
-        ruler: { enabled: false }
-        compactor: { enabled: false }
-        distributor: { enabled: false }
-        querier: { enabled: false }
-        queryFrontend: { enabled: false }
-        ingester: { enabled: false }
-        tableManager: { enabled: false }
+              boltdb:
+                directory: /var/loki/index
   syncPolicy:
     automated: { prune: true, selfHeal: true }
     syncOptions: [ "CreateNamespace=true" ]
