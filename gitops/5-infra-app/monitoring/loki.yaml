@@ -22,20 +22,23 @@ spec:
           replicas: 1
 
         loki:
-          useTestSchema: true
-          storage:
-            use_thanos_objstore: false
-            bucketNames:
-              chunks: chunks
-              ruler: ruler
-              admin: admin
+          schemaConfig:
+            configs:
+              - from: "2020-10-24"
+                store: boltdb-shipper
+                object_store: filesystem
+                schema: v13
+                index:
+                  prefix: index_
+                  period: 24h
 
-          # ВАЖНО: storage_config под boltdb, без boltdb_shipper/shared_store
           storage_config:
             filesystem:
               directory: /var/loki/chunks
-            boltdb:
-              directory: /var/loki/index
+            boltdb_shipper:
+              active_index_directory: /var/loki/index
+              cache_location: /var/loki/index-cache
+              shared_store: filesystem
 
         resources:
           requests: { cpu: 50m, memory: 128Mi }
@@ -45,7 +48,7 @@ spec:
           serviceMonitor:
             enabled: true
 
-        # отключаем лишние роли
+        # остальные роли выключены как выше
         read: { replicas: 0 }
         write: { replicas: 0 }
         backend: { replicas: 0 }
