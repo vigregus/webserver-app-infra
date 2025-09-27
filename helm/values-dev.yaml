@@ -21,6 +21,9 @@ backend:
     requests:
       cpu: 100m
       memory: 128Mi
+  autoscaling:
+    enabled: false
+
 
 ingress:
   enabled: false
@@ -30,6 +33,3 @@ services:
     type: NodePort
   frontend:
     type: NodePort
-
-podDisruptionBudget:
-  enabled: false

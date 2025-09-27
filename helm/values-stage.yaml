@@ -21,6 +21,11 @@ backend:
     requests:
       cpu: 500m
       memory: 512Mi
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
 
 ingress:
   enabled: false
@@ -49,7 +54,3 @@ services:
     type: ClusterIP
   frontend:
     type: ClusterIP
-
-podDisruptionBudget:
-  enabled: true
-  minAvailable: 1

@@ -30,6 +30,12 @@ backend:
       cpu: 250m
       memory: 256Mi
 
+  autoscaling:
+    enabled: false
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+
   nodeSelector: {}
 
   tolerations: []
@@ -112,14 +118,6 @@ podAnnotations: {}
 # Image pull secrets
 imagePullSecrets: []
 
-# Pod Disruption Budget
-podDisruptionBudget:
-  enabled: true
-  minAvailable: 1
-
-# Network Policies
-networkPolicy:
-  enabled: false
 
 persistence:
   enabled: false
