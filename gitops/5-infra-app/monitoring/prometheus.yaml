@@ -1,0 +1,51 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kube-prometheus-stack
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  source:
+    repoURL: https://prometheus-community.github.io/helm-charts
+    chart: kube-prometheus-stack
+    targetRevision: ""                 # можно оставить пустым (последняя) или зафиксировать
+    helm:
+      releaseName: kube-prom-stack
+      values: |
+        grafana:
+          adminPassword: admin
+          service:
+            type: ClusterIP
+          # заранее добавим источник логов (Loki)
+          additionalDataSources:
+            - name: Loki
+              type: loki
+              access: proxy
+              url: http://loki.logging.svc.cluster.local:3100
+
+        # немного уменьшим ресурсы для minikube
+        prometheus:
+          prometheusSpec:
+            resources:
+              requests: { cpu: 100m, memory: 256Mi }
+              limits:   { cpu: 500m, memory: 512Mi }
+            # чтобы подхватывались ServiceMonitor-ы из других чартов
+            serviceMonitorSelectorNilUsesHelmValues: false
+
+        kube-state-metrics:
+          resources:
+            requests: { cpu: 50m, memory: 100Mi }
+            limits:   { cpu: 200m, memory: 200Mi }
+
+        nodeExporter:
+          resources:
+            requests: { cpu: 20m, memory: 50Mi }
+            limits:   { cpu: 100m, memory: 100Mi }
+  syncPolicy:
+    automated: { prune: true, selfHeal: true }
+    syncOptions: [ "CreateNamespace=true", "ServerSideApply=true" ]
