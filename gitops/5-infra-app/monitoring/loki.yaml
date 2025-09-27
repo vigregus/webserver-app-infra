@@ -21,49 +21,104 @@ spec:
 
         singleBinary:
           replicas: 1
-          resources:
-            requests: { cpu: 50m,  memory: 128Mi }
-            limits:   { cpu: 200m, memory: 256Mi }
 
-          podSecurityContext:
-            fsGroup: 10001
-            fsGroupChangePolicy: OnRootMismatch
+          # куда Loki пишет (мы смонтируем сюда emptyDir)
+          extraVolumes:
+            - name: loki-data
+              emptyDir: {}
+
+          extraVolumeMounts:
+            - name: loki-data
+              mountPath: /var/loki
+
+          # init-контейнер под root подготовит каталог и права
+          extraInitContainers:
+            - name: init-perms
+              image: busybox:1.36
+              command: ["/bin/sh","-c"]
+              args:
+                - |
+                  set -eux
+                  mkdir -p /var/loki/chunks /var/loki/index
+                  chown -R 10001:10001 /var/loki
+              securityContext:
+                runAsUser: 0
+                runAsGroup: 0
+              volumeMounts:
+                - name: loki-data
+                  mountPath: /var/loki
+
+          # основной контейнер под непривилегированным пользователем
           containerSecurityContext:
             runAsUser: 10001
             runAsGroup: 10001
             runAsNonRoot: true
             allowPrivilegeEscalation: false
 
-          # Монтируем ВСТРОЕННЫЙ volume `storage` ДОПОЛНИТЕЛЬНО в /data
-          extraVolumeMounts:
-            - name: storage        # это встроенный volume чарта
-              mountPath: /data
+          podSecurityContext:
+            fsGroup: 10001
+            fsGroupChangePolicy: OnRootMismatch
 
-          # Чиним права именно в /data (это тот же volume `storage`)
-          extraInitContainers:
-            - name: fix-perms
-              image: busybox:1.36
-              securityContext:
-                runAsUser: 0
-              command: ["/bin/sh", "-c"]
-              args:
-                - >
-                  mkdir -p /data/chunks /data/index &&
-                  chown -R 10001:10001 /data &&
-                  chmod -R g+rwX /data
-              volumeMounts:
-                - name: storage
-                  mountPath: /data
+          resources:
+            requests: { cpu: 50m,  memory: 128Mi }
+            limits:   { cpu: 200m, memory: 256Mi }
 
-        # Оставляем встроенный emptyDir (без PVC)
+        # никаких PVC
         persistence:
           enabled: false
 
+        # метрики для прома (если нужен ServiceMonitor)
         monitoring:
           serviceMonitor:
             enabled: true
 
-        # На всякий случай обнулим scalable-роли
+        # конфиг Loki (минимальный, файловое хранилище)
+        loki:
+          # чтобы шаблоны чарта не требовали объектное хранилище
+          storage:
+            use_thanos_objstore: false
+            bucketNames: { chunks: chunks, ruler: ruler, admin: admin }
+
+          # отключаем memberlist авто-джойн (иначе будет пытаться резолвить loki-memberlist)
+          memberlistConfig:
+            join_members: []
+
+          # реальный runtime-конфиг (структурированный)
+          structuredConfig:
+            auth_enabled: false
+            server:
+              http_listen_port: 3100
+
+            # ring в памяти (моно-бинарный режим)
+            ingester:
+              chunk_idle_period: 5m
+              chunk_retain_period: 30s
+              lifecycler:
+                address: 127.0.0.1
+                ring:
+                  kvstore: { store: inmemory }
+                  replication_factor: 1
+                final_sleep: 0s
+
+            # схема на файловой системе (tsdb + filesystem)
+            schema_config:
+              configs:
+                - from: "2024-01-01"
+                  store: tsdb
+                  object_store: filesystem
+                  schema: v13
+                  index:
+                    prefix: loki_index_
+                    period: 24h
+
+            storage_config:
+              filesystem:
+                directory: /var/loki/chunks
+
+            # (опционально) индекс рядом — Loki с TSDB сам управляет каталогом
+            # boltdb_shipper/boltdb НЕ НУЖЕН в TSDB
+
+        # гарантированно выключаем все остальные роли
         read:          { replicas: 0 }
         write:         { replicas: 0 }
         backend:       { replicas: 0 }
@@ -76,36 +131,6 @@ spec:
         ruler:         { enabled: false }
         indexGateway:  { enabled: false }
         tableManager:  { enabled: false }
-
-        loki:
-          useTestSchema: true
-          storage:
-            use_thanos_objstore: false
-            bucketNames: { chunks: chunks, ruler: ruler, admin: admin }
-          memberlistConfig:
-            join_members: []
-
-          # РЕАЛЬНЫЙ runtime-конфиг: пути указываем в /data
-          structuredConfig:
-            auth_enabled: false
-            server:
-              http_listen_port: 3100
-            memberlist:
-              join_members: []
-
-            ingester:
-              chunk_idle_period: 5m
-              chunk_retain_period: 30s
-              lifecycler:
-                address: 127.0.0.1
-                ring:
-                  kvstore: { store: inmemory }
-                  replication_factor: 1
-                final_sleep: 0s
-
-            storage_config:
-              filesystem: { directory: /data/chunks }
-              boltdb:     { directory: /data/index }
 
 
   syncPolicy:
