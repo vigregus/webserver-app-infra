@@ -34,7 +34,12 @@ spec:
             runAsNonRoot: true
             allowPrivilegeEscalation: false
 
-          # ВАЖНО: правим права на volume 'storage' (это /var/loki, создаётся чартом)
+          # Монтируем ВСТРОЕННЫЙ volume `storage` ДОПОЛНИТЕЛЬНО в /data
+          extraVolumeMounts:
+            - name: storage        # это встроенный volume чарта
+              mountPath: /data
+
+          # Чиним права именно в /data (это тот же volume `storage`)
           extraInitContainers:
             - name: fix-perms
               image: busybox:1.36
@@ -43,14 +48,14 @@ spec:
               command: ["/bin/sh", "-c"]
               args:
                 - >
-                  mkdir -p /var/loki/chunks /var/loki/index &&
-                  chown -R 10001:10001 /var/loki &&
-                  chmod -R g+rwX /var/loki
+                  mkdir -p /data/chunks /data/index &&
+                  chown -R 10001:10001 /data &&
+                  chmod -R g+rwX /data
               volumeMounts:
-                - name: storage          # <-- встроенный volume чарта
-                  mountPath: /var/loki
+                - name: storage
+                  mountPath: /data
 
-        # Встроенный emptyDir (без PVC)
+        # Оставляем встроенный emptyDir (без PVC)
         persistence:
           enabled: false
 
@@ -58,7 +63,7 @@ spec:
           serviceMonitor:
             enabled: true
 
-        # Обнуление scalable-ролей
+        # На всякий случай обнулим scalable-роли
         read:          { replicas: 0 }
         write:         { replicas: 0 }
         backend:       { replicas: 0 }
@@ -79,20 +84,29 @@ spec:
             bucketNames: { chunks: chunks, ruler: ruler, admin: admin }
           memberlistConfig:
             join_members: []
+
+          # РЕАЛЬНЫЙ runtime-конфиг: пути указываем в /data
           structuredConfig:
             auth_enabled: false
-            server: { http_listen_port: 3100 }
-            memberlist: { join_members: [] }
+            server:
+              http_listen_port: 3100
+            memberlist:
+              join_members: []
+
             ingester:
               chunk_idle_period: 5m
               chunk_retain_period: 30s
               lifecycler:
                 address: 127.0.0.1
-                ring: { kvstore: { store: inmemory }, replication_factor: 1 }
+                ring:
+                  kvstore: { store: inmemory }
+                  replication_factor: 1
                 final_sleep: 0s
+
             storage_config:
-              filesystem: { directory: /var/loki/chunks }
-              boltdb:     { directory: /var/loki/index }
+              filesystem: { directory: /data/chunks }
+              boltdb:     { directory: /data/index }
+
 
   syncPolicy:
     automated:
