@@ -2,9 +2,7 @@
 global:
   imageRegistry: "ghcr.io/vigregus"
   imagePullSecrets:
-    create: false
-    name: ghcr-secret
-    reflectFrom: argocd/ghcr-secret
+    - name: ghcr-secret
   storageClass: ""
 
 # Backend service configuration

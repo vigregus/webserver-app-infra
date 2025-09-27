@@ -1,9 +1,9 @@
 # Development environment values
-global:
-  imagePullSecret:
-    create: true
-    name: ghcr-secret
-    reflectFrom: argocd/ghcr-secret
+
+imagePullSecret:
+  create: true
+  name: ghcr-secret
+  reflectFrom: argocd/ghcr-secret
 
 replicaCount: 1
 

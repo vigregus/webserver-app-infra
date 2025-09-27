@@ -45,8 +45,6 @@ kubeconfig*
 *.crt
 *.p12
 *.pfx
-secrets.yaml
-secrets.yml
 .secrets.baseline
 
 # IDE and editor files
