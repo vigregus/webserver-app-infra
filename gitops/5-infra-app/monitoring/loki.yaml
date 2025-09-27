@@ -18,66 +18,34 @@ spec:
       releaseName: loki
       values: |
         deploymentMode: SingleBinary
-
         singleBinary:
           replicas: 1
           resources:
             requests: { cpu: 50m,  memory: 128Mi }
             limits:   { cpu: 200m, memory: 256Mi }
-          # Дадим процессу права на том
+
+          # ВАЖНО: именно эти ключи
           podSecurityContext:
             fsGroup: 10001
             fsGroupChangePolicy: OnRootMismatch
-          securityContext:
+          containerSecurityContext:
             runAsUser: 10001
             runAsGroup: 10001
             runAsNonRoot: true
-          # Монтируем /var/loki из emptyDir
-          extraVolumes:
-            - name: loki-data
-              emptyDir: {}
-          extraVolumeMounts:
-            - name: loki-data
-              mountPath: /var/loki
+            allowPrivilegeEscalation: false
 
-        # PVC не нужен
+        # Чарт сам создаст PVC и примонтирует на /var/loki
         persistence:
-          enabled: false
+          enabled: true
+          accessModes: [ "ReadWriteOnce" ]
+          size: 5Gi
+          # storageClass: ""   # укажи свой при необходимости
 
         monitoring:
           serviceMonitor:
             enabled: true
 
-        loki:
-          # test-schema (boltdb) — просто и достаточно
-          useTestSchema: true
-          storage:
-            use_thanos_objstore: false
-            bucketNames: { chunks: chunks, ruler: ruler, admin: admin }
-
-          # Отключаем попытки join'а по memberlist
-          memberlistConfig:
-            join_members: []
-
-          structuredConfig:
-            auth_enabled: false
-            server: { http_listen_port: 3100 }
-            memberlist:
-              join_members: []   # на всякий случай и в runtime-конфиге
-            ingester:
-              chunk_idle_period: 5m
-              chunk_retain_period: 30s
-              lifecycler:
-                address: 127.0.0.1
-                ring:
-                  kvstore: { store: inmemory }
-                  replication_factor: 1
-                final_sleep: 0s
-            storage_config:
-              filesystem: { directory: /var/loki/chunks }
-              boltdb:     { directory: /var/loki/index }
-
-        # На всякий случай «обнулим» scalable-роли
+        # Обнуляем scalable-роли (чтобы валидатор не ругался)
         read:          { replicas: 0 }
         write:         { replicas: 0 }
         backend:       { replicas: 0 }
@@ -90,6 +58,34 @@ spec:
         ruler:         { enabled: false }
         indexGateway:  { enabled: false }
         tableManager:  { enabled: false }
+
+        loki:
+          useTestSchema: true
+          storage:
+            use_thanos_objstore: false
+            bucketNames: { chunks: chunks, ruler: ruler, admin: admin }
+
+          # В single-node нам не нужен memberlist join
+          memberlistConfig:
+            join_members: []
+
+          structuredConfig:
+            auth_enabled: false
+            server: { http_listen_port: 3100 }
+            memberlist:
+              join_members: []
+            ingester:
+              chunk_idle_period: 5m
+              chunk_retain_period: 30s
+              lifecycler:
+                address: 127.0.0.1
+                ring:
+                  kvstore: { store: inmemory }
+                  replication_factor: 1
+                final_sleep: 0s
+            storage_config:
+              filesystem: { directory: /var/loki/chunks }
+              boltdb:     { directory: /var/loki/index }
   syncPolicy:
     automated: { prune: true, selfHeal: true }
     syncOptions: [ "CreateNamespace=true" ]
