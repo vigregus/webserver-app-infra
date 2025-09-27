@@ -104,11 +104,7 @@ spec:
         querier:       { enabled: false }
         queryFrontend: { enabled: false }
         compactor:     { enabled: false }
-        ruler:         { enabled: false }
-        indexGateway:  { enabled: false }
-        tableManager:  { enabled: false }
-
-
+        ruler:         { enabled: false
   syncPolicy:
     automated:
       prune: true
