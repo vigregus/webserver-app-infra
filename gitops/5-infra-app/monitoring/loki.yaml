@@ -17,29 +17,22 @@ spec:
     helm:
       releaseName: loki
       values: |
-        deploymentMode: SingleBinary
+       deploymentMode: SingleBinary
         singleBinary:
           replicas: 1
-
-        # лёгкие лимиты для minikube
-        resources:
-          requests: { cpu: 50m,  memory: 128Mi }
-          limits:   { cpu: 200m, memory: 256Mi }
+          resources:
+            requests: { cpu: 50m,  memory: 128Mi }
+            limits:   { cpu: 200m, memory: 256Mi }
 
         monitoring:
           serviceMonitor:
             enabled: true
 
         loki:
-          # <<< НОВОЕ: минимально нужная секция storage с bucketNames >>>
-          storage:
-            use_thanos_objstore: false
-            bucketNames:
-              chunks: chunks
-              ruler: ruler
-              admin: admin
+          # ОБЯЗАТЕЛЬНО отключаем тестовую схему
+          useTestSchema: false
 
-          # твоя схема хранения (оставил v13 и filesystem)
+          # Требование чарта: отдельный schemaConfig (валидатор смотрит сюда)
           schemaConfig:
             configs:
               - from: "2020-10-24"
@@ -50,16 +43,57 @@ spec:
                   prefix: index_
                   period: 24h
 
-          # твой storage_config под boltdb-shipper + filesystem
-          storage_config:
-            filesystem:
-              directory: /var/loki/chunks
-            boltdb_shipper:
-              active_index_directory: /var/loki/index
-              cache_location: /var/loki/index-cache
-              shared_store: filesystem
+          # Минимально нужная секция storage для helper-ов чарта
+          storage:
+            use_thanos_objstore: false
+            bucketNames:
+              chunks: chunks
+              ruler:  ruler
+              admin:  admin
 
-        # выключаем лишние роли
+          # Реальный конфиг Loki — цельно в structuredConfig
+          structuredConfig:
+            auth_enabled: false
+            server:
+              http_listen_port: 3100
+
+            # ring в single-binary (inmemory memberlist)
+            memberlist:
+              join_members:
+                - "loki-memberlist"   # сервис создаёт сам чарт; можно оставить так
+
+            ingester:
+              chunk_idle_period: 5m
+              chunk_retain_period: 30s
+              max_transfer_retries: 0
+              lifecycler:
+                address: 127.0.0.1
+                ring:
+                  kvstore:
+                    store: inmemory
+                  replication_factor: 1
+                final_sleep: 0s
+
+            # СХЕМА + ХРАНИЛИЩЕ — ТУТ ЖЕ (и она совпадает со schemaConfig выше)
+            schema_config:
+              configs:
+                - from: "2020-10-24"
+                  store: boltdb-shipper
+                  object_store: filesystem
+                  schema: v13
+                  index:
+                    prefix: index_
+                    period: 24h
+
+            storage_config:
+              filesystem:
+                directory: /var/loki/chunks
+              boltdb_shipper:
+                active_index_directory: /var/loki/index
+                cache_location: /var/loki/index-cache
+                shared_store: filesystem
+
+        # Всё лишнее выключено
         read:          { replicas: 0 }
         write:         { replicas: 0 }
         backend:       { replicas: 0 }
@@ -68,10 +102,10 @@ spec:
         ruler:         { enabled: false }
         compactor:     { enabled: false }
         distributor:   { enabled: false }
-        querier:       { enabled: 0 }
-        queryFrontend: { enabled: 0 }
-        ingester:      { enabled: 0 }
-        tableManager:  { enabled: 0 }
+        querier:       { enabled: false }
+        queryFrontend: { enabled: false }
+        ingester:      { enabled: false }
+        tableManager:  { enabled: false }
   syncPolicy:
     automated: { prune: true, selfHeal: true }
     syncOptions: [ "CreateNamespace=true", "ServerSideApply=true" ]
