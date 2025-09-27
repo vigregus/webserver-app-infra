@@ -4,20 +4,36 @@ metadata:
   name: argo-rollouts
   namespace: argocd
 spec:
-  project: infra-apps
+  project: default
   destination:
     server: https://kubernetes.default.svc
     namespace: argo-rollouts
   source:
     repoURL: https://argoproj.github.io/argo-helm
     chart: argo-rollouts
-    targetRevision: 2.36.8
+    targetRevision: "2.33.0"  # Используем стабильную версию
     helm:
       values: |
         controller:
           replicas: 1
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
         dashboard:
           enabled: true
+          service:
+            type: ClusterIP
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
   syncPolicy:
     automated:
       prune: true
