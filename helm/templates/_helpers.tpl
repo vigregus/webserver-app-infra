@@ -73,39 +73,10 @@ app.kubernetes.io/component: backend
 {{- end }}
 
 {{/*
-Frontend specific labels
-*/}}
-{{- define "webserver-app.frontend.labels" -}}
-helm.sh/chart: {{ include "webserver-app.chart" . }}
-{{ include "webserver-app.frontend.selectorLabels" . }}
-{{- if .Chart.AppVersion }}
-app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
-{{- end }}
-app.kubernetes.io/managed-by: {{ .Release.Service }}
-app.kubernetes.io/component: frontend
-{{- end }}
-
-{{/*
-Frontend selector labels
-*/}}
-{{- define "webserver-app.frontend.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "webserver-app.name" . }}-frontend
-app.kubernetes.io/instance: {{ .Release.Name }}
-app.kubernetes.io/component: frontend
-{{- end }}
-
-{{/*
 Backend fullname
 */}}
 {{- define "webserver-app.backend.fullname" -}}
 {{- printf "%s-backend" (include "webserver-app.fullname" .) }}
-{{- end }}
-
-{{/*
-Frontend fullname
-*/}}
-{{- define "webserver-app.frontend.fullname" -}}
-{{- printf "%s-frontend" (include "webserver-app.fullname" .) }}
 {{- end }}
 
 {{/*
@@ -141,17 +112,5 @@ Backend image name
 {{- printf "%s/%s:%s" $registry .Values.backend.image.repository (.Values.backend.image.tag | default .Chart.AppVersion) -}}
 {{- else -}}
 {{- printf "%s:%s" .Values.backend.image.repository (.Values.backend.image.tag | default .Chart.AppVersion) -}}
-{{- end -}}
-{{- end -}}
-
-{{/*
-Frontend image name
-*/}}
-{{- define "webserver-app.frontend.image" -}}
-{{- $registry := .Values.global.imageRegistry | default .Values.frontend.image.registry -}}
-{{- if $registry }}
-{{- printf "%s/%s:%s" $registry .Values.frontend.image.repository (.Values.frontend.image.tag | default .Chart.AppVersion) -}}
-{{- else -}}
-{{- printf "%s:%s" .Values.frontend.image.repository (.Values.frontend.image.tag | default .Chart.AppVersion) -}}
 {{- end -}}
 {{- end -}}

@@ -22,16 +22,6 @@ backend:
       cpu: 100m
       memory: 128Mi
 
-frontend:
-  replicaCount: 1
-  resources:
-    limits:
-      cpu: 100m
-      memory: 128Mi
-    requests:
-      cpu: 50m
-      memory: 64Mi
-
 ingress:
   enabled: false
 
