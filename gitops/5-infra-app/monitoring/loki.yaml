@@ -16,8 +16,9 @@ spec:
     targetRevision: "6.41.1"
     helm:
       releaseName: loki
+      # ИСПРАВЛЕННАЯ СЕКЦИЯ VALUES:
       values: |
-       deploymentMode: SingleBinary
+        deploymentMode: SingleBinary
 
         singleBinary:
           replicas: 1
@@ -104,7 +105,11 @@ spec:
         querier:       { enabled: false }
         queryFrontend: { enabled: false }
         compactor:     { enabled: false }
-        ruler:         { enabled: false
+        ruler:         { enabled: false }
+        indexGateway:  { enabled: false }
+        tableManager:  { enabled: false }
+
+
   syncPolicy:
     automated:
       prune: true
