@@ -24,6 +24,7 @@ spec:
           resources:
             requests: { cpu: 50m,  memory: 128Mi }
             limits:   { cpu: 200m, memory: 256Mi }
+          # Дадим процессу права на том
           podSecurityContext:
             fsGroup: 10001
             fsGroupChangePolicy: OnRootMismatch
@@ -31,6 +32,7 @@ spec:
             runAsUser: 10001
             runAsGroup: 10001
             runAsNonRoot: true
+          # Монтируем /var/loki из emptyDir
           extraVolumes:
             - name: loki-data
               emptyDir: {}
@@ -38,6 +40,7 @@ spec:
             - name: loki-data
               mountPath: /var/loki
 
+        # PVC не нужен
         persistence:
           enabled: false
 
@@ -46,23 +49,47 @@ spec:
             enabled: true
 
         loki:
+          # test-schema (boltdb) — просто и достаточно
           useTestSchema: true
           storage:
             use_thanos_objstore: false
             bucketNames: { chunks: chunks, ruler: ruler, admin: admin }
+
+          # Отключаем попытки join'а по memberlist
+          memberlistConfig:
+            join_members: []
+
           structuredConfig:
             auth_enabled: false
             server: { http_listen_port: 3100 }
+            memberlist:
+              join_members: []   # на всякий случай и в runtime-конфиге
             ingester:
               chunk_idle_period: 5m
               chunk_retain_period: 30s
               lifecycler:
                 address: 127.0.0.1
-                ring: { kvstore: { store: inmemory }, replication_factor: 1 }
+                ring:
+                  kvstore: { store: inmemory }
+                  replication_factor: 1
                 final_sleep: 0s
             storage_config:
               filesystem: { directory: /var/loki/chunks }
               boltdb:     { directory: /var/loki/index }
+
+        # На всякий случай «обнулим» scalable-роли
+        read:          { replicas: 0 }
+        write:         { replicas: 0 }
+        backend:       { replicas: 0 }
+        gateway:       { replicas: 0 }
+        distributor:   { enabled: false }
+        ingester:      { enabled: false }
+        querier:       { enabled: false }
+        queryFrontend: { enabled: false }
+        compactor:     { enabled: false }
+        ruler:         { enabled: false }
+        indexGateway:  { enabled: false }
+        tableManager:  { enabled: false }
   syncPolicy:
     automated: { prune: true, selfHeal: true }
     syncOptions: [ "CreateNamespace=true" ]
