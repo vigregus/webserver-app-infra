@@ -170,3 +170,9 @@ podDisruptionBudget:
 # Network Policies
 networkPolicy:
   enabled: false
+
+persistence:
+  enabled: false
+  storageClass: ""
+  accessMode: ReadWriteOnce
+  size: 1Gi
