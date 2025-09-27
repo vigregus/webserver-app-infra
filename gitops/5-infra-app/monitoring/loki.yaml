@@ -23,7 +23,7 @@ spec:
         singleBinary:
           replicas: 1
 
-          # Настройки безопасности, необходимые для записи в /var/loki
+          # Настройки безопасности для Minikube/emptyDir
           podSecurityContext:
             fsGroup: 10001
             fsGroupChangePolicy: OnRootMismatch
@@ -41,7 +41,7 @@ spec:
             - name: loki-data
               mountPath: /var/loki
 
-          # Init-контейнер для гарантированного исправления прав доступа (PERMISSION DENIED FIX)
+          # Init-контейнер для гарантированного исправления прав доступа
           extraInitContainers:
             - name: fix-perms
               image: busybox:1.36
@@ -61,8 +61,9 @@ spec:
             enabled: true
 
         loki:
-          # НОВОЕ ИСПРАВЛЕНИЕ: Установка тестовой схемы для Minikube (устраняет ошибку validate.yaml)
+          # --- ИСПРАВЛЕНИЕ ОШИБКИ SCHEMA_CONFIG ---
           useTestSchema: true
+          # ---------------------------------------
 
           memberlistConfig:
             join_members: []
@@ -90,7 +91,7 @@ spec:
                   replication_factor: 1
                 final_sleep: 0s
 
-            # Локальное хранение на смонтированном томе
+            # Локальное хранение (используется вместе с useTestSchema)
             storage_config:
               filesystem:
                 directory: /var/loki/chunks
