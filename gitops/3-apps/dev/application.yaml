@@ -10,8 +10,6 @@ metadata:
     argocd-image-updater.argoproj.io/write-back-method: git
     argocd-image-updater.argoproj.io/git-branch: main
     argocd-image-updater.argoproj.io/git-repository: https://github.com/vigregus/webserver-app-infra.git
-    argocd-image-updater.argoproj.io/write-back-target: 'helmvalues:helm/.values-dev-image.yaml'
-    argocd-image-updater.argoproj.io/backend.write-back-target: 'helmvalues:helm/.values-dev-image.yaml'
     argocd-image-updater.argoproj.io/backend.update-strategy: name
     argocd-image-updater.argoproj.io/backend.max-tags: "100"
     argocd-image-updater.argoproj.io/backend.allow-tags: regexp:^dev-.*$
@@ -39,7 +37,6 @@ spec:
     helm:
       valueFiles:
         - values-dev.yaml
-        - .values-dev-image.yaml
   syncPolicy:
     automated:
       prune: true
