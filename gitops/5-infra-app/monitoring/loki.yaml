@@ -17,7 +17,7 @@ spec:
     helm:
       releaseName: loki
       values: |
-       deploymentMode: SingleBinary
+        deploymentMode: SingleBinary
         singleBinary:
           replicas: 1
           resources:
@@ -30,7 +30,7 @@ spec:
 
         loki:
           # ОБЯЗАТЕЛЬНО отключаем тестовую схему
-          useTestSchema: false
+          useTestSchema: falseß
 
           # Требование чарта: отдельный schemaConfig (валидатор смотрит сюда)
           schemaConfig:
