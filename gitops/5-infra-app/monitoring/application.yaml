@@ -13,7 +13,7 @@ spec:
   source:
     repoURL: https://prometheus-community.github.io/helm-charts
     chart: kube-prometheus-stack
-    targetRevision: ""     # зафиксируй версию (напр. "65.3.0")
+    targetRevision: "77.12.0"
     helm:
       releaseName: kube-prom-stack
       values: |
@@ -48,7 +48,7 @@ spec:
   source:
     repoURL: https://grafana.github.io/helm-charts
     chart: loki
-    targetRevision: ""     # зафиксируй версию (напр. "6.x")
+    targetRevision: "6.41.1"
     helm:
       releaseName: loki
       values: |
@@ -64,7 +64,7 @@ metadata:
   name: fluent-bit
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "1"   # подождать, пока поднимется Loki
+    argocd.argoproj.io/sync-wave: "1"
 spec:
   project: default
   destination:
@@ -73,7 +73,7 @@ spec:
   source:
     repoURL: https://fluent.github.io/helm-charts
     chart: fluent-bit
-    targetRevision: ""     # зафиксируй версию (напр. "0.47.x")
+    targetRevision: "0.53.0"
     helm:
       releaseName: fluent-bit
       values: |
