@@ -1,6 +1,6 @@
 apiVersion: v2
 name: webserver-app
-description: Helm chart for deploying React frontend and FastAPI backend application
+description: Helm chart for deploying FastAPI backend application
 
 type: application
 

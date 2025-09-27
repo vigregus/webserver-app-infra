@@ -21,11 +21,6 @@ backend:
     requests:
       cpu: 500m
       memory: 512Mi
-  autoscaling:
-    enabled: true
-    minReplicas: 2
-    maxReplicas: 10
-    targetCPUUtilizationPercentage: 70
 
 ingress:
   enabled: false
@@ -36,7 +31,7 @@ ingress:
     nginx.ingress.kubernetes.io/rate-limit: "100"
     nginx.ingress.kubernetes.io/rate-limit-window: "1m"
   hosts:
-    - host: your-domain.com
+    - host: vigregus.com
       paths:
         - path: /
           pathType: Prefix
@@ -47,7 +42,7 @@ ingress:
   tls:
     - secretName: webserver-app-tls
       hosts:
-        - your-domain.com
+        - vigregus.com
 
 services:
   backend:

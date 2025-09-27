@@ -30,12 +30,6 @@ backend:
       cpu: 250m
       memory: 256Mi
 
-  autoscaling:
-    enabled: false
-    minReplicas: 2
-    maxReplicas: 10
-    targetCPUUtilizationPercentage: 80
-
   nodeSelector: {}
 
   tolerations: []
@@ -98,11 +92,6 @@ services:
     type: ClusterIP
     port: 8000
     targetPort: 8000
-
-  frontend:
-    type: ClusterIP
-    port: 80
-    targetPort: 80
 
 # Service Account
 serviceAccount:
