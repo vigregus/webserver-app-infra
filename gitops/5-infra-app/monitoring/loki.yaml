@@ -18,64 +18,51 @@ spec:
       releaseName: loki
       values: |
         deploymentMode: SingleBinary
+
         singleBinary:
           replicas: 1
           resources:
             requests: { cpu: 50m,  memory: 128Mi }
             limits:   { cpu: 200m, memory: 256Mi }
+          podSecurityContext:
+            fsGroup: 10001
+            fsGroupChangePolicy: OnRootMismatch
+          securityContext:
+            runAsUser: 10001
+            runAsGroup: 10001
+            runAsNonRoot: true
+          extraVolumes:
+            - name: loki-data
+              emptyDir: {}
+          extraVolumeMounts:
+            - name: loki-data
+              mountPath: /var/loki
 
-        # ЯВНО обнуляем все simple-scalable роли (чтобы не ругался validator)
-        read:          { replicas: 0 }
-        write:         { replicas: 0 }
-        backend:       { replicas: 0 }
-        gateway:       { replicas: 0 }
-        distributor:   { enabled: false }
-        ingester:      { enabled: false }
-        querier:       { enabled: false }
-        queryFrontend: { enabled: false }
-        compactor:     { enabled: false }
-        ruler:         { enabled: false }
-        indexGateway:  { enabled: false }
-        tableManager:  { enabled: false }
+        persistence:
+          enabled: false
 
         monitoring:
           serviceMonitor:
             enabled: true
 
         loki:
-          # используем test-schema => store: boltdb (без boltdb_shipper)
           useTestSchema: true
-
-          # минимальный блок, которого требуют шаблоны
           storage:
             use_thanos_objstore: false
-            bucketNames:
-              chunks: chunks
-              ruler:  ruler
-              admin:  admin
-
-          # реальный конфиг loki: НИКАКОГО boltdb_shipper и НИКАКОГО max_transfer_retries
+            bucketNames: { chunks: chunks, ruler: ruler, admin: admin }
           structuredConfig:
             auth_enabled: false
-            server:
-              http_listen_port: 3100
-
+            server: { http_listen_port: 3100 }
             ingester:
               chunk_idle_period: 5m
               chunk_retain_period: 30s
               lifecycler:
                 address: 127.0.0.1
-                ring:
-                  kvstore:
-                    store: inmemory
-                  replication_factor: 1
+                ring: { kvstore: { store: inmemory }, replication_factor: 1 }
                 final_sleep: 0s
-
             storage_config:
-              filesystem:
-                directory: /var/loki/chunks
-              boltdb:
-                directory: /var/loki/index
+              filesystem: { directory: /var/loki/chunks }
+              boltdb:     { directory: /var/loki/index }
   syncPolicy:
     automated: { prune: true, selfHeal: true }
     syncOptions: [ "CreateNamespace=true" ]
