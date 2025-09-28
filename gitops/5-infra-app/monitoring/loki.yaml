@@ -16,14 +16,12 @@ spec:
     targetRevision: "6.41.1"
     helm:
       releaseName: loki
-      # ВАЖНО: Все строки ниже имеют нулевой отступ относительно |
       values: |
         deploymentMode: SingleBinary
 
         singleBinary:
           replicas: 1
 
-          # (Omitted security and volume contexts for brevity, assume they are correct)
           podSecurityContext:
             fsGroup: 10001
             fsGroupChangePolicy: OnRootMismatch
@@ -33,17 +31,20 @@ spec:
             runAsGroup: 10001
             runAsNonRoot: true
 
+          # Volume is defined here
           extraVolumes:
             - name: loki-data
               emptyDir: {}
-          extraVolumeMounts:
-            - name: loki-data
-              mountPath: /var/loki
+
+          # --- УДАЛЕН КОНФЛИКТНЫЙ extraVolumeMounts: /var/loki ---
+          # (ЛЮБЫЕ ДРУГИЕ mountPath могут быть тут)
+          # ----------------------------------------------------
 
           # Init-контейнер для гарантированного исправления прав доступа
           extraInitContainers:
             - name: fix-perms
               image: busybox:1.36
+              # Init container STILL mounts /var/loki to fix permissions
               command: ["sh","-c","mkdir -p /var/loki/chunks /var/loki/index/locks && chown -R 10001:10001 /var/loki"]
               securityContext:
                 runAsUser: 0
@@ -51,6 +52,7 @@ spec:
                 - name: loki-data
                   mountPath: /var/loki
 
+        # Отключаем PVC
         persistence:
           enabled: false
 
@@ -59,8 +61,6 @@ spec:
             enabled: true
 
         loki:
-          # УБРАН: useTestSchema: true (заменен явной конфигурацией схемы ниже)
-
           memberlistConfig:
             join_members: []
 
@@ -68,7 +68,6 @@ spec:
             use_thanos_objstore: false
             bucketNames: { chunks: chunks, ruler: ruler, admin: admin }
 
-          # --- ИСПРАВЛЕНИЕ: ПРЯМАЯ КОНФИГУРАЦИЯ СХЕМЫ ---
           structuredConfig:
             auth_enabled: false
             server:
@@ -87,23 +86,23 @@ spec:
                   replication_factor: 1
                 final_sleep: 0s
 
-            # ЯВНЫЙ SCHEMA_CONFIG (обязателен для валидации)
+            # ЯВНЫЙ SCHEMA_CONFIG (для прохождения валидации)
             schema_config:
               configs:
-                - from: 2023-01-01 # Дата в прошлом
+                - from: 2023-01-01
                   store: boltdb
                   object_store: filesystem
-                  schema: v12 # Стабильная версия схемы
+                  schema: v12
                   index:
                     prefix: index_
                     period: 24h
 
+            # Локальное хранение (использует путь /var/loki, но не монтирует его снова)
             storage_config:
               filesystem:
                 directory: /var/loki/chunks
               boltdb:
                 directory: /var/loki/index
-          # -----------------------------------------------
 
         # Отключение всех лишних компонентов
         read:          { replicas: 0 }
