@@ -39,11 +39,11 @@ spec:
               emptyDir: {}
 
           # --- CRITICAL FIX: RESTORE VOLUME MOUNTING ---
-          # This block is necessary so that the main Loki container mounts /var/loki
-          # as an emptyDir volume, rather than trying to write to the read-only filesystem of the image.
-          # extraVolumeMounts:
-          #   - name: loki-data
-          #     mountPath: /var/loki
+          # Возвращаем это монтирование, чтобы основной контейнер явно использовал
+          # read-write том loki-data, что устранит ошибку "read-only file system".
+          extraVolumeMounts:
+            - name: loki-data
+              mountPath: /var/loki
           # -------------------------------------------------------------
 
           # Init container for fixing access rights (PERMISSION DENIED FIX)
