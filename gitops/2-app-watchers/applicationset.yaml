@@ -7,13 +7,15 @@ metadata:
     argocd.argoproj.io/sync-wave: "1"
 spec:
   generators:
+    # Возвращаемся к list генератору, чтобы гарантировать валидные имена 'dev' и 'stage'
     - list:
         elements:
           - environment: dev
           - environment: stage
   template:
     metadata:
-      name: '{{path.base}}-webserver-app'
+      # Используем переменную 'environment' из list генератора
+      name: '{{environment}}-webserver-app'
       namespace: argocd
       annotations:
         argocd-image-updater.argoproj.io/image-list: |
@@ -23,7 +25,7 @@ spec:
         argocd-image-updater.argoproj.io/git-repository: https://github.com/vigregus/webserver-app-infra.git
         argocd-image-updater.argoproj.io/backend.update-strategy: name
         argocd-image-updater.argoproj.io/backend.max-tags: "100"
-        argocd-image-updater.argoproj.io/backend.allow-tags: regexp:^{{path.base}}-.*$
+        argocd-image-updater.argoproj.io/backend.allow-tags: regexp:^{{environment}}-.*$
         argocd-image-updater.argoproj.io/backend.force-update: "true"
         argocd-image-updater.argoproj.io/backend.helm.image-name: backend.image.repository
         argocd-image-updater.argoproj.io/backend.helm.image-tag: backend.image.tag
@@ -37,11 +39,12 @@ spec:
         targetRevision: main
         path: helm
         helm:
+          # Используем переменную 'environment' для указания файла
           valueFiles:
-            - '{{path.basename}}'
+            - 'values-{{environment}}.yaml'
       destination:
         server: https://kubernetes.default.svc
-        namespace: '{{path.base}}'
+        namespace: '{{environment}}' # Используем 'environment' для пространства имен
       syncPolicy:
         automated:
           prune: true
