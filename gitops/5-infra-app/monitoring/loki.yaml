@@ -16,7 +16,7 @@ spec:
     targetRevision: "6.41.1" # Используйте актуальную стабильную версию
     helm:
       releaseName: loki
-      # ВАЖНО: Весь блок ниже - это содержимое values.yaml, переданное напрямую.
+      # Весь блок ниже - это содержимое values.yaml, переданное напрямую.
       values: |
         deploymentMode: SingleBinary
 
@@ -37,6 +37,13 @@ spec:
           extraVolumes:
             - name: loki-data
               emptyDir: {}
+
+          # --- КРИТИЧНОЕ ИСПРАВЛЕНИЕ: Восстановление mount для основного контейнера ---
+          # Позволяет Loki записывать данные, устраняя ошибку 'read-only file system'
+          extraVolumeMounts:
+            - name: loki-data
+              mountPath: /var/loki
+          # --------------------------------------------------------------------------
 
           # Init-контейнер для исправления прав доступа (PERMISSION DENIED FIX)
           extraInitContainers:
@@ -73,6 +80,7 @@ spec:
 
             # --- ИСПРАВЛЕНИЕ 1: Отключение Structured Metadata ---
             limits_config:
+              # Устраняет ошибку требования v13 и tsdb
               allow_structured_metadata: false
             # ----------------------------------------------------
 
