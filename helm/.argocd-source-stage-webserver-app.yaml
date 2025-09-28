@@ -1,0 +1,8 @@
+helm:
+  parameters:
+  - name: backend.image.repository
+    value: ghcr.io/vigregus/webserver-app-back
+    forcestring: true
+  - name: backend.image.tag
+    value: stage-20250924-191708-05d2250
+    forcestring: true
