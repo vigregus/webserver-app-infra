@@ -7,29 +7,29 @@ metadata:
     argocd.argoproj.io/sync-wave: "1"
 spec:
   generators:
-    - list:
-        elements:
-          - environment: dev
-          - environment: stage
-          - environment: prod
+    - git:
+        repoURL: https://github.com/vigregus/webserver-app-infra.git
+        revision: main
+        files:
+          - path: "helm/values-*.yaml"
   template:
     metadata:
-      name: '{{environment}}-webserver-app'
+      name: '{{path.base}}-webserver-app'
       namespace: argocd
       annotations:
         argocd-image-updater.argoproj.io/image-list: |
           backend=ghcr.io/vigregus/webserver-app-back
         argocd-image-updater.argoproj.io/write-back-method: git
         argocd-image-updater.argoproj.io/git-branch: main
-        argocd-image-updater.argoproj.io/git-repository: https://github.com/vigregus/webserver-app-infra.git
-        argocd-image-updater.argoproj.io/backend.update-strategy: name
-        argocd-image-updater.argoproj.io/backend.max-tags: "100"
-        argocd-image-updater.argoproj.io/backend.allow-tags: regexp:^{{environment}}-.*$
-        argocd-image-updater.argoproj.io/backend.force-update: "true"
-        argocd-image-updater.argoproj.io/backend.helm.image-name: backend.image.repository
-        argocd-image-updater.argoproj.io/backend.helm.image-tag: backend.image.tag
-        argocd-image-updater.argoproj.io/backend.pull-secret: pullsecret:argocd/ghcr-secret
-        argocd-image-updater.argoproj.io/git-commit-message: |
+        argocd-image-updater.argocd.io/git-repository: https://github.com/vigregus/webserver-app-infra.git
+        argocd-image-updater.argocd.io/backend.update-strategy: name
+        argocd-image-updater.argocd.io/backend.max-tags: "100"
+        argocd-image-updater.argocd.io/backend.allow-tags: regexp:^{{path.base}}-.*$
+        argocd-image-updater.argocd.io/backend.force-update: "true"
+        argocd-image-updater.argocd.io/backend.helm.image-name: backend.image.repository
+        argocd-image-updater.argocd.io/backend.helm.image-tag: backend.image.tag
+        argocd-image-updater.argocd.io/backend.pull-secret: pullsecret:argocd/ghcr-secret
+        argocd-image-updater.argocd.io/git-commit-message: |
           Update {{.AppName}} to {{range .Images}}{{.Name}}:{{.Tag}} {{end}}
     spec:
       project: default
@@ -39,10 +39,11 @@ spec:
         path: helm
         helm:
           valueFiles:
-            - 'values-{{environment}}.yaml'
+            - '{{path.basename}}'
+          # -----------------------------------------------------------
       destination:
         server: https://kubernetes.default.svc
-        namespace: '{{environment}}'
+        namespace: '{{path.base}}'
       syncPolicy:
         automated:
           prune: true
