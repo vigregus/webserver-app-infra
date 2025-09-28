@@ -5,6 +5,9 @@ metadata:
   namespace: argocd
   annotations:
     argocd.argoproj.io/sync-wave: "0"
+    # --- НОВАЯ АННОТАЦИЯ ДЛЯ ИГНОРИРОВАНИЯ VMRule ---
+    resource-filter.argocd.argoproj.io/exclude-resource-kind: VMRule
+    # ----------------------------------------------------
 spec:
   project: default
   destination:
