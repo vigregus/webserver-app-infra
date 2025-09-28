@@ -7,11 +7,10 @@ metadata:
     argocd.argoproj.io/sync-wave: "1"
 spec:
   generators:
-    - git:
-        repoURL: https://github.com/vigregus/webserver-app-infra.git
-        revision: main
-        files:
-          - path: "helm/values-*.yaml"
+    - list:
+        elements:
+          - environment: dev
+          - environment: stage
   template:
     metadata:
       name: '{{path.base}}-webserver-app'
