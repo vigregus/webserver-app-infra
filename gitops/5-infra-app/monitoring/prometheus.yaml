@@ -37,6 +37,31 @@ spec:
             # чтобы подхватывались ServiceMonitor-ы из других чартов
             serviceMonitorSelectorNilUsesHelmValues: false
 
+            # --- СЮДА ДОБАВЛЯЕТСЯ КОНФИГУРАЦИЯ СКРАЙПА ---
+            additionalScrapeConfigs:
+              - job_name: 'custom-python-app'
+                kubernetes_sd_configs:
+                  # Настройка обнаружения целей через Kubernetes API
+                  # Здесь используется обнаружение по сервисам (service)
+                  - role: endpoints
+                # Настройка relabeling для поиска нужного Service/Endpoints
+                relabel_configs:
+                  # 1. Отбираем только нужный Service (замените 'your-app-service' на имя вашего Service)
+                  - source_labels: [__meta_kubernetes_service_label_app]
+                    regex: my-python-app # Используйте лейбл, по которому можно найти Service
+                    action: keep
+                  # 2. Перезаписываем имя порта (если порт не стандартный)
+                  # Если ваше приложение экспортирует метрики на порту с именем 'http-metrics'
+                  - source_labels: [__meta_kubernetes_endpoint_port_name]
+                    regex: http-metrics
+                    action: keep
+                  # 3. Устанавливаем метку 'instance' как имя пода
+                  - source_labels: [__meta_kubernetes_pod_name]
+                    target_label: instance
+                  # 4. Устанавливаем путь к метрикам
+                  - target_label: __metrics_path__
+                    replacement: /metrics # Используйте путь, который экспортирует ваше приложение
+
         kube-state-metrics:
           resources:
             requests: { cpu: 50m, memory: 100Mi }
