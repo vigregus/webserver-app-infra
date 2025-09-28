@@ -12,6 +12,9 @@ spec:
         revision: main
         files:
           - path: "helm/values-*.yaml"
+          - exclude: "helm/values-*_*.yaml"
+          - exclude: "helm/values-.*.yaml"
+          - exclude: "helm/values.yaml"
   template:
     metadata:
       name: '{{path.base}}-webserver-app'
