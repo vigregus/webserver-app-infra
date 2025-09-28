@@ -1,0 +1,38 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: stage
+  namespace: argocd
+  annotations:
+    argocd-image-updater.argoproj.io/image-list: |
+      backend=ghcr.io/vigregus/webserver-app-back,
+      frontend=ghcr.io/vigregus/webserver-app-front
+    argocd-image-updater.argoproj.io/write-back-method: git
+    argocd-image-updater.argoproj.io/git-branch: main
+    argocd-image-updater.argoproj.io/git-repository: https://github.com/vigregus/webserver-app-infra.git
+    argocd-image-updater.argoproj.io/backend.update-strategy: name
+    argocd-image-updater.argoproj.io/backend.allow-tags: regexp:^stage-[0-9]+\.[0-9]+\.[0-9]+$
+    argocd-image-updater.argoproj.io/backend.helm.image-name: backend.image.repository
+    argocd-image-updater.argoproj.io/backend.helm.image-tag: backend.image.tag
+    argocd-image-updater.argoproj.io/backend.pull-secret: pullsecret:argocd/ghcr-secret
+    argocd-image-updater.argoproj.io/git-commit-message: |
+      Update {{.AppName}} to {{range .Images}}{{.Name}}:{{.Tag}} {{end}}
+spec:
+  destination:
+    namespace: stage
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    repoURL: https://github.com/vigregus/webserver-app-infra.git
+    targetRevision: main
+    path: helm
+    helm:
+      valueFiles:
+        - values-stage.yaml
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
