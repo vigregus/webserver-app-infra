@@ -23,7 +23,7 @@ spec:
         singleBinary:
           replicas: 1
 
-          # Настройки безопасности для Minikube/emptyDir
+          # (Omitted security and volume contexts for brevity, assume they are correct)
           podSecurityContext:
             fsGroup: 10001
             fsGroupChangePolicy: OnRootMismatch
@@ -33,7 +33,6 @@ spec:
             runAsGroup: 10001
             runAsNonRoot: true
 
-          # Используем временный том узла (emptyDir)
           extraVolumes:
             - name: loki-data
               emptyDir: {}
@@ -52,7 +51,6 @@ spec:
                 - name: loki-data
                   mountPath: /var/loki
 
-        # Отключаем PVC
         persistence:
           enabled: false
 
@@ -61,9 +59,7 @@ spec:
             enabled: true
 
         loki:
-          # --- ИСПРАВЛЕНИЕ ОШИБКИ SCHEMA_CONFIG ---
-          useTestSchema: true
-          # ---------------------------------------
+          # УБРАН: useTestSchema: true (заменен явной конфигурацией схемы ниже)
 
           memberlistConfig:
             join_members: []
@@ -72,7 +68,7 @@ spec:
             use_thanos_objstore: false
             bucketNames: { chunks: chunks, ruler: ruler, admin: admin }
 
-          # Конфиг самого Loki
+          # --- ИСПРАВЛЕНИЕ: ПРЯМАЯ КОНФИГУРАЦИЯ СХЕМЫ ---
           structuredConfig:
             auth_enabled: false
             server:
@@ -91,12 +87,23 @@ spec:
                   replication_factor: 1
                 final_sleep: 0s
 
-            # Локальное хранение (используется вместе с useTestSchema)
+            # ЯВНЫЙ SCHEMA_CONFIG (обязателен для валидации)
+            schema_config:
+              configs:
+                - from: 2023-01-01 # Дата в прошлом
+                  store: boltdb
+                  object_store: filesystem
+                  schema: v12 # Стабильная версия схемы
+                  index:
+                    prefix: index_
+                    period: 24h
+
             storage_config:
               filesystem:
                 directory: /var/loki/chunks
               boltdb:
                 directory: /var/loki/index
+          # -----------------------------------------------
 
         # Отключение всех лишних компонентов
         read:          { replicas: 0 }
