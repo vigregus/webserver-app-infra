@@ -20,39 +20,62 @@ spec:
     helm:
       releaseName: kube-prom-stack
       values: |
+        # --- ОТКЛЮЧАЕМ ЛИШНИЕ ДАШБОРДЫ И ПРАВИЛА ---
+
+        # Отключение импорта всех стандартных дашбордов, кроме базовых
         grafana:
           adminPassword: admin
           service:
             type: ClusterIP
-          # заранее добавим источник логов (Loki)
           additionalDataSources:
             - name: Loki
               type: loki
               access: proxy
               url: http://loki.logging.svc.cluster.local:3100
+          # Устанавливаем минимальный набор встроенных дашбордов
+          defaultDashboardsTimezone: UTC
 
-        # немного уменьшим ресурсы для minikube
-        prometheus:
-          prometheusSpec:
-            resources:
-              requests: { cpu: 100m, memory: 256Mi }
-              limits:   { cpu: 500m, memory: 512Mi }
-            # чтобы подхватывались ServiceMonitor-ы из других чартов
-            serviceMonitorSelectorNilUsesHelmValues: false
+        # Отключение стандартных правил оповещения (PrometheusRules)
+        prometheus-node-exporter:
+          enabled: true
 
-            # --- БЛОК additionalScrapeConfigs УДАЛЕН ---
-            # Теперь ServiceMonitor должен быть создан в Helm-чарте вашего приложения.
-
+        # Отключение ServiceMonitor'ов и правил для API Server, Kubelet, Scheduler и т.д.
+        # Это значительно уменьшает количество метрик и дашбордов.
+        kubeApiServer:
+          enabled: false
+        kubelet:
+          enabled: false
+        kubeControllerManager:
+          enabled: false
+        kubeScheduler:
+          enabled: false
+        kubeProxy:
+          enabled: false
+        coreDNS:
+          enabled: false
         kube-state-metrics:
+          # Оставляем включенным, так как он предоставляет важные метрики о состоянии подов
+          enabled: true
           resources:
             requests: { cpu: 50m, memory: 100Mi }
             limits:   { cpu: 200m, memory: 200Mi }
 
-        nodeExporter:
-          # --- ИСПРАВЛЕНИЯ ДЛЯ ПЛАНИРОВАНИЯ (SCHEDULING) ---
+        prometheus:
+          prometheusSpec:
+            # Отключение всех правил оповещения, которые генерируются чартом
+            ruleSelectorNilUsesHelmValues: false
+            # Отключение всех ServiceMonitor'ов, кроме тех, что вы создаете вручную
+            serviceMonitorSelectorNilUsesHelmValues: false
 
-          # 1. Добавляем Tolerations, чтобы NodeExporter мог запускаться на Control Plane узлах
-          # (которые часто имеют Taint 'node-role.kubernetes.io/control-plane')
+            resources:
+              requests: { cpu: 100m, memory: 256Mi }
+              limits:   { cpu: 500m, memory: 512Mi }
+            # ServiceMonitor-ы вашего приложения будут обнаружены вручную (по лейблам)
+
+        nodeExporter:
+          # Оставляем NodeExporter, чтобы собирать метрики самого узла
+          enabled: true
+          # --- ИСПРАВЛЕНИЯ ДЛЯ ПЛАНИРОВАНИЯ (SCHEDULING) ---
           tolerations:
             - key: "node-role.kubernetes.io/control-plane"
               operator: "Exists"
@@ -60,13 +83,8 @@ spec:
             - key: "node-role.kubernetes.io/master"
               operator: "Exists"
               effect: "NoSchedule"
-
-          # 2. Отключаем использование hostPort (решает ошибку 'didn't have free ports')
           hostPort: 0
-
-          # 3. Сбрасываем строгие NodeSelector
           nodeSelector: {}
-
           resources:
             requests: { cpu: 20m, memory: 50Mi }
             limits:   { cpu: 100m, memory: 100Mi }
