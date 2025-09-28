@@ -1,212 +1,222 @@
-{
-  "annotations": {
-    "list": [
-      {
-        "builtIn": 1,
-        "datasource": {
-          "type": "datasource",
-          "uid": "prometheus"
-        },
-        "enable": true,
-        "hide": true,
-        "iconColor": "rgba(0, 211, 255, 1)",
-        "name": "Annotations & Alerts",
-        "target": {
-          "limit": 100,
-          "matchAny": false,
-          "tags": [],
-          "type": "dashboard"
-        },
-        "type": "dashboard"
-      }
-    ]
-  },
-  "description": "Total Request Rate and Count for Webserver Backend (DEV and STAGE)",
-  "editable": true,
-  "fiscalYearStartMonth": 0,
-  "gnetId": null,
-  "graphTooltip": 1,
-  "id": null,
-  "links": [],
-  "liveNow": false,
-  "panels": [
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: webserver-backend-requests-dashboard
+  namespace: logging
+  labels:
+    grafana_dashboard: "1"
+    app.kubernetes.io/instance: kube-prom-stack
+data:
+  app_requests_dashboard.json: |
     {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "Prometheus"
+      "annotations": {
+        "list": [
+          {
+            "builtIn": 1,
+            "datasource": {
+              "type": "datasource",
+              "uid": "prometheus"
+            },
+            "enable": true,
+            "hide": true,
+            "iconColor": "rgba(0, 211, 255, 1)",
+            "name": "Annotations & Alerts",
+            "target": {
+              "limit": 100,
+              "matchAny": false,
+              "tags": [],
+              "type": "dashboard"
+            },
+            "type": "dashboard"
+          }
+        ]
       },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
+      "description": "Total Request Rate and Count for Webserver Backend (DEV and STAGE)",
+      "editable": true,
+      "fiscalYearStartMonth": 0,
+      "gnetId": null,
+      "graphTooltip": 1,
+      "id": null,
+      "links": [],
+      "liveNow": false,
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "Prometheus"
           },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillBorderColor": "rgba(0,0,0,0.1)",
-            "fillGradient": 0,
-            "hideThresholds": false,
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineStyle": {
-              "fillBelow": false
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillBorderColor": "rgba(0,0,0,0.1)",
+                "fillGradient": 0,
+                "hideThresholds": false,
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineStyle": {
+                  "fillBelow": false
+                },
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "noValue": "N/A",
+              "unit": "reqps"
             },
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 12,
+            "x": 0,
+            "y": 0
+          },
+          "id": 2,
+          "options": {
+            "legend": {
+              "calcs": [
+                "mean",
+                "max"
+              ],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
             },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
             }
           },
-          "mappings": [],
-          "noValue": "N/A",
-          "unit": "reqps"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 9,
-        "w": 12,
-        "x": 0,
-        "y": 0
-      },
-      "id": 2,
-      "options": {
-        "legend": {
-          "calcs": [
-            "mean",
-            "max"
+          "targets": [
+            {
+              "expr": "sum by (namespace, exported_endpoint) (rate(app_requests_total{exported_endpoint!=\"\"}[5m]))",
+              "legendFormat": "{{namespace}} - {{exported_endpoint}}",
+              "refId": "A"
+            }
           ],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
+          "title": "Request Rate (RPS) DEV vs STAGE",
+          "type": "timeseries"
         },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "targets": [
         {
-          "expr": "sum by (namespace, exported_endpoint) (rate(app_requests_total{exported_endpoint!=\"\"}[5m]))",
-          "legendFormat": "{{namespace}} - {{exported_endpoint}}",
-          "refId": "A"
-        }
-      ],
-      "title": "Request Rate (RPS) DEV vs STAGE",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "Prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
+          "datasource": {
+            "type": "prometheus",
+            "uid": "Prometheus"
           },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillBorderColor": "rgba(0,0,0,0.1)",
-            "fillGradient": 0,
-            "hideThresholds": false,
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineStyle": {
-              "fillBelow": false
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillBorderColor": "rgba(0,0,0,0.1)",
+                "fillGradient": 0,
+                "hideThresholds": false,
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineStyle": {
+                  "fillBelow": false
+                },
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "noValue": "N/A",
+              "unit": "short"
             },
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 12,
+            "x": 12,
+            "y": 0
+          },
+          "id": 4,
+          "options": {
+            "legend": {
+              "calcs": [
+                "mean",
+                "max"
+              ],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
             },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
             }
           },
-          "mappings": [],
-          "noValue": "N/A",
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 9,
-        "w": 12,
-        "x": 12,
-        "y": 0
-      },
-      "id": 4,
-      "options": {
-        "legend": {
-          "calcs": [
-            "mean",
-            "max"
+          "targets": [
+            {
+              "expr": "sum by (namespace, exported_endpoint) (app_requests_total)",
+              "legendFormat": "{{namespace}} Total Requests - {{exported_endpoint}}",
+              "refId": "A"
+            }
           ],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "targets": [
-        {
-          "expr": "sum by (namespace, exported_endpoint) (app_requests_total)",
-          "legendFormat": "{{namespace}} Total Requests - {{exported_endpoint}}",
-          "refId": "A"
+          "title": "Total Requests Count Over Time",
+          "type": "timeseries"
         }
       ],
-      "title": "Total Requests Count Over Time",
-      "type": "timeseries"
+      "refresh": "5s",
+      "schemaVersion": 39,
+      "style": "dark",
+      "tags": [
+        "kubernetes",
+        "application",
+        "backend"
+      ],
+      "templating": {
+        "list": []
+      },
+      "time": {
+        "from": "now-30m",
+        "to": "now"
+      },
+      "timepicker": {},
+      "timezone": "",
+      "title": "Webserver Backend Request Overview",
+      "uid": "webserver_backend_overview",
+      "version": 1
     }
-  ],
-  "refresh": "5s",
-  "schemaVersion": 39,
-  "style": "dark",
-  "tags": [
-    "kubernetes",
-    "application",
-    "backend"
-  ],
-  "templating": {
-    "list": []
-  },
-  "time": {
-    "from": "now-30m",
-    "to": "now"
-  },
-  "timepicker": {},
-  "timezone": "",
-  "title": "Webserver Backend Request Overview",
-  "uid": "webserver_backend_overview",
-  "version": 1
-}
