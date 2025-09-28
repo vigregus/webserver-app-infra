@@ -129,6 +129,6 @@ serviceMonitor:
   labels:
     release: kube-prom-stack
   endpoints:
-    - port: http-metrics # Имя порта, которое мы только что определили выше (в service.name)
-      path: /metrics     # Стандартный путь для метрик (если отличается, измените)
+    - port: http-metrics # Port name that we just defined above (in service.name)
+      path: /metrics     # Standard path for metrics (change if different)
       interval: 15s

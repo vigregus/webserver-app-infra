@@ -1,54 +1,54 @@
 # Webserver App Helm Chart
 
-Этот Helm чарт предназначен для деплоя веб-приложения, состоящего из React фронтенда и FastAPI бэкенда в Kubernetes кластер.
+This Helm chart is designed for deploying a web application consisting of a React frontend and FastAPI backend to a Kubernetes cluster.
 
-## Структура приложения
+## Application Structure
 
-- **Backend**: FastAPI приложение на Python, предоставляющее REST API
-- **Frontend**: React приложение на TypeScript, обслуживаемое через Nginx
-- **Ingress**: Nginx Ingress Controller для внешнего доступа
+- **Backend**: FastAPI Python application providing REST API
+- **Frontend**: React TypeScript application served via Nginx
+- **Ingress**: Nginx Ingress Controller for external access
 
-## Предварительные требования
+## Prerequisites
 
 - Kubernetes 1.19+
 - Helm 3.0+
-- Nginx Ingress Controller (для внешнего доступа)
+- Nginx Ingress Controller (for external access)
 
-## Установка
+## Installation
 
-### Из локального чарта
+### From local chart
 
 ```bash
-# Добавить репозиторий (если используется)
+# Add repository (if used)
 helm repo add your-repo https://your-helm-repo.com
 helm repo update
 
-# Установить чарт
+# Install chart
 helm install webserver-app ./webserver-app
 
-# Или с кастомными значениями
+# Or with custom values
 helm install webserver-app ./webserver-app -f values-prod.yaml
 ```
 
-### Для разработки
+### For development
 
 ```bash
 helm install webserver-app ./webserver-app -f values-dev.yaml
 ```
 
-## Конфигурация
+## Configuration
 
-### Основные параметры
+### Main parameters
 
-| Параметр | Описание | Значение по умолчанию |
+| Parameter | Description | Default value |
 |----------|----------|----------------------|
-| `backend.enabled` | Включить бэкенд | `true` |
-| `frontend.enabled` | Включить фронтенд | `true` |
-| `backend.replicaCount` | Количество реплик бэкенда | `2` |
-| `frontend.replicaCount` | Количество реплик фронтенда | `2` |
-| `ingress.enabled` | Включить Ingress | `true` |
+| `backend.enabled` | Enable backend | `true` |
+| `frontend.enabled` | Enable frontend | `true` |
+| `backend.replicaCount` | Number of backend replicas | `2` |
+| `frontend.replicaCount` | Number of frontend replicas | `2` |
+| `ingress.enabled` | Enable Ingress | `true` |
 
-### Ресурсы
+### Resources
 
 ```yaml
 backend:
@@ -70,7 +70,7 @@ frontend:
       memory: 128Mi
 ```
 
-### Автомасштабирование
+### Autoscaling
 
 ```yaml
 backend:
@@ -96,9 +96,9 @@ ingress:
           service: backend
 ```
 
-## Примеры использования
+## Usage Examples
 
-### Развертывание в development
+### Deployment in development
 
 ```bash
 helm install webserver-app-dev ./webserver-app \
@@ -107,7 +107,7 @@ helm install webserver-app-dev ./webserver-app \
   -f values-dev.yaml
 ```
 
-### Развертывание в production
+### Deployment in production
 
 ```bash
 helm install webserver-app-prod ./webserver-app \
@@ -117,90 +117,90 @@ helm install webserver-app-prod ./webserver-app \
   --set ingress.hosts[0].host=your-domain.com
 ```
 
-### Обновление приложения
+### Application update
 
 ```bash
 helm upgrade webserver-app ./webserver-app -f values-prod.yaml
 ```
 
-### Удаление
+### Removal
 
 ```bash
 helm uninstall webserver-app
 ```
 
-## Мониторинг
+## Monitoring
 
-### Проверка статуса
+### Status check
 
 ```bash
-# Проверить поды
+# Check pods
 kubectl get pods -l app.kubernetes.io/instance=webserver-app
 
-# Проверить сервисы
+# Check services
 kubectl get svc -l app.kubernetes.io/instance=webserver-app
 
-# Проверить Ingress
+# Check Ingress
 kubectl get ingress -l app.kubernetes.io/instance=webserver-app
 ```
 
-### Логи
+### Logs
 
 ```bash
-# Логи бэкенда
+# Backend logs
 kubectl logs -l app.kubernetes.io/component=backend -f
 
-# Логи фронтенда
+# Frontend logs
 kubectl logs -l app.kubernetes.io/component=frontend -f
 ```
 
-### Доступ к приложению
+### Application access
 
-После установки приложение будет доступно по адресу, указанному в Ingress. Для локального тестирования можно использовать port-forward:
+After installation, the application will be available at the address specified in Ingress. For local testing, you can use port-forward:
 
 ```bash
-# Доступ к фронтенду
+# Access to frontend
 kubectl port-forward svc/webserver-app-frontend 3000:80
 
-# Доступ к бэкенду
+# Access to backend
 kubectl port-forward svc/webserver-app-backend 8000:8000
 ```
 
 ## Troubleshooting
 
-### Поды не запускаются
+### Pods not starting
 
-1. Проверьте образы:
+1. Check images:
 ```bash
 kubectl describe pod <pod-name>
 ```
 
-2. Проверьте ресурсы:
+2. Check resources:
 ```bash
 kubectl top pods
 ```
 
-### Проблемы с Ingress
+### Ingress issues
 
-1. Убедитесь, что установлен Nginx Ingress Controller
-2. Проверьте аннотации Ingress
-3. Проверьте DNS настройки
+1. Make sure Nginx Ingress Controller is installed
+2. Check Ingress annotations
+3. Check DNS settings
 
-### Проблемы с подключением между сервисами
+### Service connection issues
 
-1. Проверьте Service Discovery:
+1. Check Service Discovery:
 ```bash
 kubectl get endpoints
 ```
 
-2. Проверьте сетевые политики:
+2. Check network policies:
 ```bash
 kubectl get networkpolicies
 ```
 
-## Кастомизация
+## Customization
 
-### Добавление переменных окружения
+### Adding environment variables
 
 ```yaml
 backend:
@@ -214,7 +214,7 @@ backend:
           key: secret-key
 ```
 
-### Настройка health checks
+### Health checks configuration
 
 ```yaml
 backend:
@@ -225,7 +225,7 @@ backend:
     periodSeconds: 10
 ```
 
-### Настройка Persistent Volumes
+### Persistent Volumes configuration
 
 ```yaml
 persistence:
@@ -234,7 +234,7 @@ persistence:
   size: 10Gi
 ```
 
-## Безопасность
+## Security
 
 ### Service Account
 
@@ -262,6 +262,6 @@ securityContext:
     - ALL
 ```
 
-## Лицензия
+## License
 
 MIT

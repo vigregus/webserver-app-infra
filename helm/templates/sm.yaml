@@ -6,26 +6,26 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "webserver-app.backend.labels" . | nindent 4 }}
-    # Эту метку использует kube-prometheus-stack для обнаружения SM
+    # This label is used by kube-prometheus-stack to discover SM
     release: {{ .Values.backend.serviceMonitor.releaseLabel | default "kube-prom-stack" }}
 spec:
-  # Выбираем Service (не Pod) по его меткам
+  # Select Service (not Pod) by its labels
   selector:
     matchLabels:
-      # Используем метки селектора, которые использует ваш Service
+      # Use selector labels that your Service uses
       {{- include "webserver-app.backend.selectorLabels" . | nindent 6 }}
 
-  # Указываем, в каких пространствах имен искать Service
+  # Specify which namespaces to search for Service
   namespaceSelector:
     matchNames:
       - {{ .Release.Namespace }}
 
-  # Настройки опроса
+  # Polling settings
   endpoints:
-    - port: {{ .Values.backend.service.name | default "http" }} # Используем именованный порт Service
-      path: {{ .Values.backend.serviceMonitor.path | default "/metrics" }} # Путь к метрикам
+    - port: {{ .Values.backend.service.name | default "http" }} # Use named port of Service
+      path: {{ .Values.backend.serviceMonitor.path | default "/metrics" }} # Path to metrics
       interval: {{ .Values.backend.serviceMonitor.interval | default "15s" }}
 
-      # Если метрики находятся на другом порту, можно использовать:
+      # If metrics are on a different port, you can use:
       # targetPort: {{ .Values.backend.service.targetPort }}
 {{- end }}

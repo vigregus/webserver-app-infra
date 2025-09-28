@@ -64,10 +64,10 @@ resource "helm_release" "updater" {
   depends_on = [helm_release.argocd]
 }
 
-# ----- GitHub Repository Secret (с правильным именем) -----
+# ----- GitHub Repository Secret (with correct name) -----
 resource "kubernetes_secret" "github_repo" {
   metadata {
-    name      = "github-repo" # <-- Правильное имя
+    name      = "github-repo" # <-- Correct name
     namespace = kubernetes_namespace.argocd.metadata[0].name
     labels = {
       "argocd.argoproj.io/secret-type" = "repository"
@@ -88,7 +88,7 @@ resource "kubernetes_secret" "github_repo" {
   depends_on = [helm_release.argocd]
 }
 
-# ----- ImagePullSecret для GitHub Container Registry -----
+# ----- ImagePullSecret for GitHub Container Registry -----
 resource "kubernetes_secret" "ghcr_secret" {
   metadata {
     name      = "ghcr-secret"
@@ -177,7 +177,7 @@ resource "time_sleep" "wait_external_secrets_crds" {
   create_duration = "30s"
 }
 
-# RBAC: разрешаем контроллеру ESO читать секреты в argocd
+# RBAC: allow ESO controller to read secrets in argocd
 resource "kubernetes_role" "eso_read_secrets_argocd" {
   metadata {
     name      = "eso-read-secrets"
@@ -229,7 +229,7 @@ resource "kubernetes_manifest" "cluster_secret_store_k8s" {
             }
           }
           remoteNamespace = "argocd"
-          # Добавляем caBundle для обхода валидации TLS
+          # Add caBundle to bypass TLS validation
           server = {
             caProvider = {
               type      = "ConfigMap"

@@ -4,7 +4,7 @@ metadata:
   name: promtail
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "1"    # подождать Loki
+    argocd.argoproj.io/sync-wave: "1"    # wait for Loki
 spec:
   project: default
   destination:
