@@ -118,9 +118,17 @@ podAnnotations: {}
 # Image pull secrets
 imagePullSecrets: []
 
-
 persistence:
   enabled: false
   storageClass: ""
   accessMode: ReadWriteOnce
   size: 1Gi
+
+serviceMonitor:
+  enabled: true
+  labels:
+    release: kube-prom-stack
+  endpoints:
+    - port: http-metrics # Имя порта, которое мы только что определили выше (в service.name)
+      path: /metrics     # Стандартный путь для метрик (если отличается, измените)
+      interval: 15s

@@ -1,0 +1,31 @@
+{{- if and .Values.backend.enabled .Values.backend.serviceMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "webserver-app.backend.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "webserver-app.backend.labels" . | nindent 4 }}
+    # Эту метку использует kube-prometheus-stack для обнаружения SM
+    release: {{ .Values.backend.serviceMonitor.releaseLabel | default "kube-prom-stack" }}
+spec:
+  # Выбираем Service (не Pod) по его меткам
+  selector:
+    matchLabels:
+      # Используем метки селектора, которые использует ваш Service
+      {{- include "webserver-app.backend.selectorLabels" . | nindent 6 }}
+
+  # Указываем, в каких пространствах имен искать Service
+  namespaceSelector:
+    matchNames:
+      - {{ .Release.Namespace }}
+
+  # Настройки опроса
+  endpoints:
+    - port: {{ .Values.backend.service.name | default "http" }} # Используем именованный порт Service
+      path: {{ .Values.backend.serviceMonitor.path | default "/metrics" }} # Путь к метрикам
+      interval: {{ .Values.backend.serviceMonitor.interval | default "15s" }}
+
+      # Если метрики находятся на другом порту, можно использовать:
+      # targetPort: {{ .Values.backend.service.targetPort }}
+{{- end }}
