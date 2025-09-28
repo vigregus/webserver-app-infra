@@ -23,7 +23,11 @@ backend:
       memory: 128Mi
   autoscaling:
     enabled: false
-
+  serviceMonitor:
+    enabled: true
+    releaseLabel: kube-prom-stack
+    path: "/metrics"
+    interval: "15s"
 
 ingress:
   enabled: false

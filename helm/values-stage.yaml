@@ -26,6 +26,11 @@ backend:
     minReplicas: 2
     maxReplicas: 10
     targetCPUUtilizationPercentage: 70
+  serviceMonitor:
+    enabled: true
+    releaseLabel: kube-prom-stack
+    path: "/metrics"
+    interval: "15s"
 
 ingress:
   enabled: false
