@@ -11,6 +11,7 @@ spec:
         elements:
           - environment: dev
           - environment: stage
+          - environment: prod
   template:
     metadata:
       name: '{{environment}}-webserver-app'

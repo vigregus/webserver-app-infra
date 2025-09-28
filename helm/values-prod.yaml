@@ -1,0 +1,61 @@
+# Production environment values
+replicaCount: 2
+
+backend:
+  config:
+    apiUrl: "http://webserver-app-backend-prod:8000"
+    version: "1.0.0-prod"
+    environment: "production"
+    features:
+      metrics: true
+      cors: true
+      rateLimit: true
+    limits:
+      maxUsers: 500
+      maxAge: 100
+  replicaCount: 2
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+    requests:
+      cpu: 500m
+      memory: 512Mi
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+  serviceMonitor:
+    enabled: true
+    releaseLabel: kube-prom-stack
+    path: "/metrics"
+    interval: "15s"
+
+ingress:
+  enabled: false
+  className: "nginx"
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/rate-limit-window: "1m"
+  hosts:
+    - host: vigregus.com
+      paths:
+        - path: /
+          pathType: Prefix
+          service: frontend
+        - path: /api
+          pathType: Prefix
+          service: backend
+  tls:
+    - secretName: webserver-app-tls
+      hosts:
+        - vigregus.com
+
+services:
+  backend:
+    type: ClusterIP
+  frontend:
+    type: ClusterIP
