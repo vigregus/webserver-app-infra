@@ -43,6 +43,42 @@ resource "helm_release" "updater" {
   depends_on = [helm_release.argocd]
 }
 
+# ----- Kyverno -----
+resource "helm_release" "kyverno" {
+  name       = "kyverno"
+  namespace  = "kyverno"
+  repository = "https://kyverno.github.io/kyverno/"
+  chart      = "kyverno"
+  version    = "3.2.1"
+
+  create_namespace = true
+
+  set {
+    name  = "crds.install"
+    value = "true"
+  }
+
+  wait = true
+}
+
+# ----- KEDA -----
+resource "helm_release" "keda" {
+  name       = "keda"
+  namespace  = "keda"
+  repository = "https://kedacore.github.io/charts"
+  chart      = "keda"
+  version    = "2.14.1"
+
+  create_namespace = true
+
+  set {
+    name  = "crds.install"
+    value = "true"
+  }
+
+  wait = true
+}
+
 # ----- App of Apps -----
 resource "kubernetes_manifest" "app_of_apps" {
   manifest = {

@@ -26,7 +26,7 @@ create: ## Create cluster and deploy applications
 	@echo "$(GREEN)✅ Cluster created!$(NC)"
 	@echo "$(YELLOW)📦 Deploying applications...$(NC)"
 	@echo "$(YELLOW)Step 1: Deploying basic infrastructure...$(NC)"
-	cd terraform && terraform apply  -auto-approve -target=helm_release.argocd -target=kubernetes_secret.github_repo -target=kubernetes_secret.ghcr_secret -target=helm_release.external_secrets -target=time_sleep.wait_external_secrets_crds -target=kubernetes_role.eso_read_secrets_argocd -target=kubernetes_role_binding.eso_read_secrets_argocd
+	cd terraform && terraform apply  -auto-approve -target=helm_release.argocd -target=kubernetes_secret.github_repo -target=kubernetes_secret.ghcr_secret -target=helm_release.external_secrets -target=time_sleep.wait_external_secrets_crds -target=kubernetes_role.eso_read_secrets_argocd -target=kubernetes_role_binding.eso_read_secrets_argocd -target=helm_release.kyverno -target=helm_release.keda
 	@echo "$(YELLOW)Step 2: Deploying applications...$(NC)"
 	cd terraform && terraform apply  -auto-approve -target=kubernetes_manifest.app_of_apps -target=kubernetes_manifest.cluster_secret_store_k8s -target=helm_release.updater
 	@echo "$(GREEN)✅ Applications deployed!$(NC)"
@@ -55,7 +55,7 @@ create-cluster: ## Create minikube cluster
 deploy-apps: ## Deploy applications
 	@echo "$(YELLOW)📦 Deploying applications...$(NC)"
 	@echo "$(YELLOW)Step 1: Deploying basic infrastructure...$(NC)"
-	cd terraform && terraform apply  -auto-approve -target=helm_release.argocd -target=kubernetes_secret.github_repo -target=kubernetes_secret.ghcr_secret -target=helm_release.external_secrets -target=time_sleep.wait_external_secrets_crds -target=kubernetes_role.eso_read_secrets_argocd -target=kubernetes_role_binding.eso_read_secrets_argocd
+	cd terraform && terraform apply  -auto-approve -target=helm_release.argocd -target=kubernetes_secret.github_repo -target=kubernetes_secret.ghcr_secret -target=helm_release.external_secrets -target=time_sleep.wait_external_secrets_crds -target=kubernetes_role.eso_read_secrets_argocd -target=kubernetes_role_binding.eso_read_secrets_argocd -target=helm_release.kyverno -target=helm_release.keda
 	@echo "$(YELLOW)Step 2: Deploying applications...$(NC)"
 	cd terraform && terraform apply  -auto-approve -target=kubernetes_manifest.app_of_apps -target=kubernetes_manifest.cluster_secret_store_k8s -target=helm_release.updater
 	@echo "$(GREEN)✅ Applications deployed!$(NC)"
@@ -63,7 +63,7 @@ deploy-apps: ## Deploy applications
 destroy: ## Destroy cluster and all applications
 	@echo "$(YELLOW)🗑️  Removing applications...$(NC)"
 	cd terraform && terraform destroy  -auto-approve -target=kubernetes_manifest.app_of_apps -target=kubernetes_manifest.cluster_secret_store_k8s -target=helm_release.updater
-	cd terraform && terraform destroy  -auto-approve -target=helm_release.argocd -target=kubernetes_secret.github_repo -target=kubernetes_secret.ghcr_secret -target=helm_release.external_secrets -target=time_sleep.wait_external_secrets_crds -target=kubernetes_role.eso_read_secrets_argocd -target=kubernetes_role_binding.eso_read_secrets_argocd
+	cd terraform && terraform destroy  -auto-approve -target=helm_release.argocd -target=kubernetes_secret.github_repo -target=kubernetes_secret.ghcr_secret -target=helm_release.external_secrets -target=time_sleep.wait_external_secrets_crds -target=kubernetes_role.eso_read_secrets_argocd -target=kubernetes_role_binding.eso_read_secrets_argocd -target=helm_release.kyverno -target=helm_release.keda
 	@echo "$(YELLOW)🗑️  Destroying cluster...$(NC)"
 	minikube delete -p $(CLUSTER_NAME)
 	@echo "$(GREEN)✅ Cluster and applications destroyed!$(NC)"
