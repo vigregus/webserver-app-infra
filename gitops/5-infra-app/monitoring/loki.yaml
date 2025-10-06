@@ -37,11 +37,6 @@ spec:
             - name: loki-data
               emptyDir: {}
 
-          # Override the default volume mount to use our emptyDir volume
-          extraVolumeMounts:
-            - name: loki-data
-              mountPath: /var/loki
-
           # Init container for fixing access rights
           extraInitContainers:
             - name: fix-perms
@@ -53,15 +48,17 @@ spec:
                 - name: loki-data
                   mountPath: /var/loki
 
-        # Disable PersistentVolumeClaim
+        # Disable PersistentVolumeClaim and override volume settings
         persistence:
           enabled: false
+          storageClass: null
 
-        # Override the default volume configuration
+        # Override the default volume configuration at the top level
         volumes:
           - name: loki-data
             emptyDir: {}
 
+        # Override volume mounts at the top level
         volumeMounts:
           - name: loki-data
             mountPath: /var/loki
