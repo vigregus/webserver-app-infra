@@ -17,9 +17,18 @@ spec:
     helm:
       releaseName: loki
       values: |
-        # Стандартная конфигурация - ничего лишнего
+        # Стандартная конфигурация для Minikube
         persistence:
           enabled: false
+
+        # Настраиваем хранилище для emptyDir
+        loki:
+          storage:
+            bucketNames:
+              chunks: chunks
+              ruler: ruler
+              admin: admin
+            use_thanos_objstore: false
 
   syncPolicy:
     automated:
