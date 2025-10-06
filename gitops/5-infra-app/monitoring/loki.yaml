@@ -13,7 +13,7 @@ spec:
   source:
     repoURL: https://grafana.github.io/helm-charts
     chart: loki-stack
-    targetRevision: "5.41.1"
+    targetRevision: "2.9.11"  # Правильная версия для loki-stack
     helm:
       releaseName: loki
       values: |
