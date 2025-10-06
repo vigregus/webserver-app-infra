@@ -13,22 +13,13 @@ spec:
   source:
     repoURL: https://grafana.github.io/helm-charts
     chart: loki
-    targetRevision: "6.41.1"
+    targetRevision: "5.41.1"  # Используем более старую стабильную версию
     helm:
       releaseName: loki
       values: |
-        # Стандартная конфигурация для Minikube
+        # Минимальная конфигурация для Minikube
         persistence:
           enabled: false
-
-        # Настраиваем хранилище для emptyDir
-        loki:
-          storage:
-            bucketNames:
-              chunks: chunks
-              ruler: ruler
-              admin: admin
-            use_thanos_objstore: false
 
   syncPolicy:
     automated:
