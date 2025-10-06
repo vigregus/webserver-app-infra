@@ -12,13 +12,15 @@ spec:
     namespace: logging
   source:
     repoURL: https://grafana.github.io/helm-charts
-    chart: loki
-    targetRevision: "5.41.1"  # Используем более старую стабильную версию
+    chart: loki-stack
+    targetRevision: "5.41.1"
     helm:
       releaseName: loki
       values: |
-        # Минимальная конфигурация для Minikube
-        persistence:
+        loki:
+          persistence:
+            enabled: false
+        promtail:
           enabled: false
 
   syncPolicy:
