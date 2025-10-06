@@ -17,31 +17,9 @@ spec:
     helm:
       releaseName: loki
       values: |
-        deploymentMode: SingleBinary
-
-        singleBinary:
-          replicas: 1
-
-          # Исправляем права доступа
-          podSecurityContext:
-            fsGroup: 10001
-            runAsUser: 10001
-            runAsGroup: 10001
-            runAsNonRoot: true
-
-        # Отключаем PVC для Minikube
+        # Стандартная конфигурация - ничего лишнего
         persistence:
           enabled: false
-
-        monitoring:
-          serviceMonitor:
-            enabled: true
-
-        loki:
-          structuredConfig:
-            auth_enabled: false
-            server:
-              http_listen_port: 3100
 
   syncPolicy:
     automated:
